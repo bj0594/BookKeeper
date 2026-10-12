@@ -1,4 +1,4 @@
-# Specification – <assignment name>
+# Specification – BookKeeper
 ## 1 The assignment in my own words
 A small system made into a REST API. TDD used to establish domain logic, then made available through REST API. 
 
@@ -10,10 +10,9 @@ Core (MUST):
 - Loan a book
 - Return a book
 - Delete a book
+- REST API
 Rules:
 - Can't loan a book that's already loaned out
-Later / bonus (NOT NOW):
-- REST API
 
 ## 3 Flow
 ![Flow](Excalidraw/flow.png)
@@ -34,6 +33,10 @@ BookService
 - void DeleteBook(Guid id)      -> book is removed
                                    unknown id: KeyNotFoundException
                                           
+Book: Id (Guid), Title (string), IsLoaned (bool)
+Example: 3f2c..., "The Hobbit", false
+
+Dependencies: storage
 
 ## 5 Test list
 - [ ] A new book can be added
@@ -47,7 +50,10 @@ Later questions:
 
 ## 6 Questions, assumptions and decisions
 I have chosen to make a small system for managing a library. The user can add, loan out, return, delete and list books. Delivered as a GitHub repo with test and a README.
-Will the repo be used for future assignments?
+- Question: Will the repo be used for future assignments? → not answered yet
+- Assumption: One repo per assignment (the grading asks for Excalidraw/ and the .sln in the root folder)
+- Decision: Returning a book that is not loaned gives an error (InvalidOperationException)
+- Clarified: "4–5 tests" in the grading means domain tests only
 
 - New project (no existing code)
 - Web API: yes (parts 3–5)
