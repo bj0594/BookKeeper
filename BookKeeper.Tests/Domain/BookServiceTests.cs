@@ -4,7 +4,7 @@ namespace BookKeeper.Tests;
 public class BookServiceTests
 {
     [Fact]
-    public void AddBook_ValidBook_AddsBookToLibrary()
+    public void Add_ValidBook_AddsBookToLibrary()
     {
         // Arrange
         var service = new BookService();
@@ -17,7 +17,7 @@ public class BookServiceTests
     }
 
     [Fact]
-    public void AddBook_ExistingBook_BecomesLoaned()
+    public void Alter_ExistingBook_BecomesLoaned()
     {
         // Arrange
         var service = new BookService();

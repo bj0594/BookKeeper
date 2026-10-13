@@ -22,6 +22,7 @@ public class BookService
 
     public void LoanBook(Guid bookId)
     {
-       throw new NotImplementedException();
+        var book = _books.First(i => i.Id == bookId);
+        book.IsLoaned = true;
     }
 }
