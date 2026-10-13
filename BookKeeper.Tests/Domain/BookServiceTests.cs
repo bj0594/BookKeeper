@@ -28,4 +28,15 @@ public class BookServiceTests
         var stored = _service.GetBooks().Single(i => i.Id == book.Id);
         Assert.True(stored.IsLoaned);
     }
+
+    [Fact]
+    public void LoanBook_AlreadyLoaned_ThrowsException()
+    {
+        // Arrange
+        var book = _service.AddBook("To Kill a Mockingbird", "Harper Lee");
+        _service.LoanBook(book.Id);
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => _service.LoanBook(book.Id));
+    }
 }
