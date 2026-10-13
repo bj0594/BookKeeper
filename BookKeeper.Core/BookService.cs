@@ -2,7 +2,7 @@ namespace BookKeeper.Core;
 
 public class BookService
 {
-    private readonly List<Book> _books = new();
+    private readonly List<Book> _books = [];
     public Book AddBook(string title, string author)
     {
         var book = new Book
