@@ -2,13 +2,21 @@ namespace BookKeeper.Core;
 
 public class BookService
 {
-    public void AddBook(string title, string author)
+    private readonly List<Book> _books = new();
+    public Book AddBook(string title, string author)
     {
-        throw new NotImplementedException();
+        var book = new Book
+        {
+            Id = Guid.NewGuid(),
+            Title = title,
+            Author = author
+        };
+        _books.Add(book);
+        return book;
     }
 
     public List<Book> GetBooks()
     {
-        throw new NotImplementedException();
+        return _books;
     }
 }
