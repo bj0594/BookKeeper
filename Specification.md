@@ -50,8 +50,7 @@ Later questions:
 
 ## 6 Questions, assumptions and decisions
 I have chosen to make a small system for managing a library. The user can add, loan out, return, delete and list books. Delivered as a GitHub repo with test and a README.
-- Question: Will the repo be used for future assignments? → not answered yet
-- Assumption: One repo per assignment (the grading asks for Excalidraw/ and the .sln in the root folder)
+- Clarified: The repo will be used for the coming assignments
 - Decision: Returning a book that is not loaned gives an error (InvalidOperationException)
 - Clarified: "4–5 tests" in the grading means domain tests only
 
