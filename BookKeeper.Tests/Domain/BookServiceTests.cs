@@ -3,31 +3,29 @@ namespace BookKeeper.Tests;
 
 public class BookServiceTests
 {
+    private readonly BookService _service = new();
+
     [Fact]
     public void AddBook_ValidBook_AddsBookToLibrary()
     {
-        // Arrange
-        var service = new BookService();
-
         // Act
-        service.AddBook("The Great Gatsby", "F. Scott Fitzgerald");
+        _service.AddBook("The Great Gatsby", "F. Scott Fitzgerald");
 
         // Assert
-        Assert.Single(service.GetBooks());
+        Assert.Single(_service.GetBooks());
     }
 
     [Fact]
     public void LoanBook_ExistingBook_BecomesLoaned()
     {
         // Arrange
-        var service = new BookService();
-        var book = service.AddBook("1984", "George Orwell");
+        var book = _service.AddBook("1984", "George Orwell");
 
         // Act
-        service.LoanBook(book.Id);
+        _service.LoanBook(book.Id);
 
         // Assert
-        var stored = service.GetBooks().Single(i => i.Id == book.Id);
+        var stored = _service.GetBooks().Single(i => i.Id == book.Id);
         Assert.True(stored.IsLoaned);
     }
 }
