@@ -15,4 +15,19 @@ public class BookServiceTests
         // Assert
         Assert.Single(service.GetBooks());
     }
+
+    [Fact]
+    public void AddBook_ExistingBook_BecomesLoaned()
+    {
+        // Arrange
+        var service = new BookService();
+        var book = service.AddBook("1984", "George Orwell");
+
+        // Act
+        service.LoanBook(book.Id);
+
+        // Assert
+        var stored = service.GetBooks().Single(i => i.Id == book.Id);
+        Assert.True(stored.IsLoaned);
+    }
 }

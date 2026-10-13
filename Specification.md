@@ -40,7 +40,7 @@ Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald", false
 Dependencies: storage
 
 ## 5 Test list
-- [ ] A new book can be added
+- [x] A new book can be added
 - [ ] A book can be marked as loaned
 - [ ] An already loaned book cannot be loaned
 - [ ] A book can be marked as returned/made available

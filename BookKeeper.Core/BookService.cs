@@ -19,4 +19,9 @@ public class BookService
     {
         return _books;
     }
+
+    public void LoanBook(Guid bookId)
+    {
+       throw new NotImplementedException();
+    }
 }
