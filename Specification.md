@@ -23,7 +23,8 @@ A loaned book cannot be loaned again
 ## 4 Interface
 BookService
 - List<Book> GetBooks()         -> all books
-- Book AddBook(string title)    -> new book, IsLoaned = false
+- Book AddBook(string title, 
+  string author)                -> new book, IsLoaned = false
 - void LoanBook(Guid id)        -> book is loaned (IsLoaned = true)
                                    already loaned: InvalidOperationException
                                    unknown id: KeyNotFoundException
@@ -33,8 +34,8 @@ BookService
 - void DeleteBook(Guid id)      -> book is removed
                                    unknown id: KeyNotFoundException
                                           
-Book: Id (Guid), Title (string), IsLoaned (bool)
-Example: 3f2c..., "The Hobbit", false
+Book: Id (Guid), Title (string), Author (string), IsLoaned (bool)
+Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald", false
 
 Dependencies: storage
 
