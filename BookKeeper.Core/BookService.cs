@@ -27,9 +27,6 @@ public class BookService
         {
             throw new InvalidOperationException("Book is already loaned.");
         }
-        else
-        {
-            book.IsLoaned = true;
-        }
+        book.IsLoaned = true;
     }
 }
