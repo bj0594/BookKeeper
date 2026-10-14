@@ -23,6 +23,13 @@ public class BookService
     public void LoanBook(Guid bookId)
     {
         var book = _books.First(i => i.Id == bookId);
-        book.IsLoaned = true;
+        if (book.IsLoaned)
+        {
+            throw new InvalidOperationException("Book is already loaned.");
+        }
+        else
+        {
+            book.IsLoaned = true;
+        }
     }
 }
