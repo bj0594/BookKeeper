@@ -13,4 +13,11 @@ public class BooksController : ControllerBase
     {
         _bookService = bookService;
     }
+
+    [HttpPost]
+    public IActionResult Create(CreateBookRequest request)
+    {
+        var book = _bookService.AddBook(request.Title, request.Author);
+        return Created($"/books/{book.Id}", book);
+    }
 }
