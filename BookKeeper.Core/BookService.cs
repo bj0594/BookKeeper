@@ -42,6 +42,7 @@ public class BookService
 
     public void DeleteBook(Guid bookId)
     {
-        throw new NotImplementedException();
+        var book = _books.First(i => i.Id == bookId);
+        _books.Remove(book);
     }
 }
