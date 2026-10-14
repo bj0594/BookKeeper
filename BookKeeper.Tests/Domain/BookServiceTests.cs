@@ -53,6 +53,5 @@ public class BookServiceTests
         // Assert
         var stored = _service.GetBooks().Single(i => i.Id == book.Id);
         Assert.False(stored.IsLoaned);
-
     }
 }
