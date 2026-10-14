@@ -42,7 +42,7 @@ Dependencies: storage
 ## 5 Test list
 - [x] A new book can be added
 - [x] A book can be marked as loaned
-- [ ] An already loaned book cannot be loaned
+- [x] An already loaned book cannot be loaned
 - [ ] A book can be marked as returned/made available
 - [ ] A book can be deleted
 Later questions:

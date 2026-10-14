@@ -29,4 +29,9 @@ public class BookService
         }
         book.IsLoaned = true;
     }
+
+    public void ReturnBook(Guid bookId)
+    {
+       throw new NotImplementedException();
+    }
 }

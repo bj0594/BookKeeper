@@ -39,4 +39,20 @@ public class BookServiceTests
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => _service.LoanBook(book.Id));
     }
+
+    [Fact]
+    public void ReturnBook_ExistingLoanedBook_BecomesNotLoaned()
+    {
+        // Arrange
+        var book = _service.AddBook("Pride and Prejudice", "Jane Austen");
+        _service.LoanBook(book.Id);
+
+        // Act
+        _service.ReturnBook(book.Id);
+
+        // Assert
+        var stored = _service.GetBooks().Single(i => i.Id == book.Id);
+        Assert.False(stored.IsLoaned);
+
+    }
 }
