@@ -32,6 +32,11 @@ public class BookService
 
     public void ReturnBook(Guid bookId)
     {
-       throw new NotImplementedException();
+        var book = _books.First(i => i.Id == bookId);
+        if (!book.IsLoaned)
+        {
+            throw new InvalidOperationException("Book is not loaned.");
+        }
+        book.IsLoaned = false;
     }
 }
