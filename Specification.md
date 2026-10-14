@@ -43,7 +43,8 @@ Dependencies: storage
 - [x] A new book can be added
 - [x] A book can be marked as loaned
 - [x] An already loaned book cannot be loaned
-- [ ] A book can be marked as returned/made available
+- [x] A book can be marked as returned/made available
+- [x] A book cannot be returned if it wasn't already loaned
 - [ ] A book can be deleted
 Later questions:
 - [ ] Can a user loan several books?

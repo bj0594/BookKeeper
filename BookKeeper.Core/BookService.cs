@@ -39,4 +39,9 @@ public class BookService
         }
         book.IsLoaned = false;
     }
+
+    public void DeleteBook(Guid bookId)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -64,4 +64,17 @@ public class BookServiceTests
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => _service.ReturnBook(book.Id));
     }
+
+    [Fact]
+    public void DeleteBook_ExistingBook_RemovesBookFromLibrary()
+    {
+        // Arrange
+        var book = _service.AddBook("The Catcher in the Rye", "J.D. Salinger");
+
+        // Act
+        _service.DeleteBook(book.Id);
+
+        // Assert
+        Assert.Empty(_service.GetBooks());
+    }
 }
