@@ -27,12 +27,9 @@ BookService
   string author)                -> new book, IsLoaned = false
 - void LoanBook(Guid id)        -> book is loaned (IsLoaned = true)
                                    already loaned: InvalidOperationException
-                                   unknown id: KeyNotFoundException
 - void ReturnBook(Guid id)      -> book is available (IsLoaned = false)
                                    not loaned: InvalidOperationException
-                                   unknown id: KeyNotFoundException
 - void DeleteBook(Guid id)      -> book is removed
-                                   unknown id: KeyNotFoundException
                                           
 Book: Id (Guid), Title (string), Author (string), IsLoaned (bool)
 Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald", false
@@ -45,16 +42,18 @@ Dependencies: storage
 - [x] An already loaned book cannot be loaned
 - [x] A book can be marked as returned/made available
 - [x] A book cannot be returned if it wasn't already loaned
-- [ ] A book can be deleted
+- [x] A book can be deleted
 Later questions:
-- [ ] Can a user loan several books?
-- [ ] Can the library add multiple copies of the same book?
+- [x] Can a user loan several books?
+- [x] Can the library add multiple copies of the same book?
 
 ## 6 Questions, assumptions and decisions
 I have chosen to make a small system for managing a library. The user can add, loan out, return, delete and list books. Delivered as a GitHub repo with test and a README.
 - Clarified: The repo will be used for the coming assignments
 - Decision: Returning a book that is not loaned gives an error (InvalidOperationException)
 - Clarified: "4–5 tests" in the grading means domain tests only
+- Decision: The option to loan several books and/or add multiple copies of same book to library is not essential to project MVP. It will not be added at this time, but might in the future
+- Decision: Unknown id exception is not included, due to InvalidOperationException sufficiently covering the needs of project MVP.
 
 - New project (no existing code)
 - Web API: yes (parts 3–5)
