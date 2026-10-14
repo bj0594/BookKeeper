@@ -4,33 +4,34 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace BookKeeper.Tests;
 
-public class BooksApiTests
+public class BooksApiTests : IDisposable
 {
-  private readonly WebApplicationFactory<Program> _factory;
-  private readonly HttpClient _client;
+    private readonly WebApplicationFactory<Program> _factory;
+    private readonly HttpClient _client;
 
-  public BooksApiTests()
-  {
-    _factory = new WebApplicationFactory<Program>();
-    _client = _factory.CreateClient();
-  }
+    public BooksApiTests()
+    {
+        _factory = new WebApplicationFactory<Program>();
+        _client = _factory.CreateClient();
+    }
+
+    public void Dispose() => _factory.Dispose();
+
+    private record BookResponse(Guid Id, string Title, string Author, bool IsLoaned);
 
     [Fact]
-  public void Dispose() => _factory.Dispose();
+    public async Task PostBook_ValidBook_ReturnsCreatedBook()
+    {
+        // Arrange
+        var request = new { Title = "Test Book", Author = "Test Author" };
 
-  //The contract as the test sees it. Don't change this unless you want to break the tests.
-  private record BookResponse(Guid Id, string Title, string Author, bool IsLoaned);
+        // Act
+        var response = await _client.PostAsJsonAsync("/books", new {request.Title, request.Author});
 
-  [Fact]
-  public async Task PostBook_ValidBook_ReturnsCreatedBook()
-  {
-    // Act
-    var response = await _client.PostAsJsonAsync("/books", new { Title = "Test Book", Author = "Test Author" });
-
-    // Assert
-    Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-    var book = await response.Content.ReadFromJsonAsync<BookResponse>();
-    Assert.Equal("Test Book", book?.Title);
-    Assert.Equal("Test Author", book?.Author);
-  }
+        // Assert
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var book = await response.Content.ReadFromJsonAsync<BookResponse>();
+        Assert.Equal(request.Title, book?.Title);
+        Assert.Equal(request.Author, book?.Author);
+    }
 }
