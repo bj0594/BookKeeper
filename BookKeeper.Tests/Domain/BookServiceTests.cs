@@ -54,4 +54,14 @@ public class BookServiceTests
         var stored = _service.GetBooks().Single(i => i.Id == book.Id);
         Assert.False(stored.IsLoaned);
     }
+
+    [Fact]
+    public void ReturnBook_NotLoanedBook_ThrowsException()
+    {
+        // Arrange
+        var book = _service.AddBook("Moby Dick", "Herman Melville");
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => _service.ReturnBook(book.Id));
+    }
 }
