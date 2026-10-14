@@ -22,7 +22,7 @@ public class BookService
 
     public void LoanBook(Guid bookId)
     {
-        var book = _books.First(i => i.Id == bookId);
+        var book = GetBookById(bookId);
         if (book.IsLoaned)
         {
             throw new InvalidOperationException("Book is already loaned.");
@@ -32,7 +32,7 @@ public class BookService
 
     public void ReturnBook(Guid bookId)
     {
-        var book = _books.First(i => i.Id == bookId);
+        var book = GetBookById(bookId);
         if (!book.IsLoaned)
         {
             throw new InvalidOperationException("Book is not loaned.");
@@ -42,7 +42,11 @@ public class BookService
 
     public void DeleteBook(Guid bookId)
     {
-        var book = _books.First(i => i.Id == bookId);
+        var book = GetBookById(bookId);
         _books.Remove(book);
+    }
+    private Book GetBookById(Guid bookId)
+    {
+        return _books.First(i => i.Id == bookId);
     }
 }
