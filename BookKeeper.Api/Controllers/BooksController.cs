@@ -26,4 +26,11 @@ public class BooksController : ControllerBase
     {
         return Ok(_bookService.GetBooks());
     }
+
+    [HttpPatch("{bookId:guid}/loan")]
+    public IActionResult LoanBook(Guid bookId)
+    {
+        _bookService.LoanBook(bookId);
+        return NoContent();
+    }
 }
