@@ -20,4 +20,10 @@ public class BooksController : ControllerBase
         var book = _bookService.AddBook(request.Title, request.Author);
         return Created($"/books/{book.Id}", book);
     }
+
+    [HttpGet]
+    public IActionResult GetAll()
+    {
+        return Ok(_bookService.GetBooks());
+    }
 }
