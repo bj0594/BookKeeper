@@ -1,6 +1,7 @@
 # Specification – BookKeeper
 ## 1 The assignment in my own words
 A small system made into a REST API. TDD used to establish domain logic, then made available through REST API. 
+I have chosen to make a small system for managing a library. The user can add, loan out, return, delete and list books. Delivered as a GitHub repo with tests and a README.
 
 ## 2 Requirements
 Main flow: A user adds a book, sees it in the list, loans it, returns it and deletes it.
@@ -55,10 +56,8 @@ Later questions:
 - [x] Can the library add multiple copies of the same book?
 
 ## 6 Questions, assumptions and decisions
-I have chosen to make a small system for managing a library. The user can add, loan out, return, delete and list books. Delivered as a GitHub repo with tests and a README.
-
 - Clarified: The repo will be used for the coming assignments
-- Clarified: "4–5 tests" in the grading means domain tests only
+- Assumption: "4–5 tests" in the grading means domain tests only
 - Decision: 6 domain tests instead of 4–5. The assignment allows more tests when needed for the main rules of the MVP, and each of the two rules has its own test
 - Decision: Returning a book that is not loaned gives an error (InvalidOperationException)
 - Decision: The option to loan several books and/or add multiple copies of the same book is not essential to the MVP. It will not be added at this time, but might be in the future
