@@ -4,13 +4,15 @@ A small system made into a REST API. TDD used to establish domain logic, then ma
 
 ## 2 Requirements
 Main flow: A user adds a book, sees it in the list, loans it, returns it and deletes it.
+
 Core (MUST):
-- Add a book        ✔ AddBook_ValidBook_AddsBookToLibrary, PostBook_ValidBook_ReturnsCreatedBook
+- Add a book        ✔ AddBook_ValidBook_AddsBookToLibrary, PostBooks_ValidBook_ReturnsCreatedBook
 - List all books    ✔ AddBook_ValidBook_AddsBookToLibrary (via GetBooks), GetBooks_AfterBookAdded_ReturnsOkWithList
 - Loan a book       ✔ LoanBook_ExistingBook_BecomesLoaned, PatchBooksLoan_ExistingBook_ReturnsNoContent
 - Return a book     ✔ ReturnBook_ExistingLoanedBook_BecomesNotLoaned, PatchBooksReturn_LoanedBook_ReturnsNoContent
 - Delete a book     ✔ DeleteBook_ExistingBook_RemovesBookFromLibrary, DeleteBooks_ExistingBook_ReturnsNoContent
 - REST API          ✔ BooksApiTests (every line in api.md)
+
 Rules:
 - Can't loan a book that's already loaned out  ✔ LoanBook_AlreadyLoaned_ThrowsException, PatchBooksLoan_AlreadyLoaned_ReturnsConflict
 - Can't return a book that hasn't been loaned  ✔ ReturnBook_NotLoanedBook_ThrowsException, PatchBooksReturn_NotLoaned_ReturnsConflict
@@ -19,22 +21,24 @@ Rules:
 ![Flow](../Excalidraw/flow.png)
 
 A user sees all books, picks an action, and the list is updated.
-A loaned book cannot be loaned again
-A book that is not loaned cannot be returned
+
+- A loaned book cannot be loaned again
+- A book that is not loaned cannot be returned
 
 ## 4 Interface
+```
 BookService
-- List<Book> GetBooks()         -> all books
-- Book AddBook(string title, 
-  string author)                -> new book, IsLoaned = false
-- void LoanBook(Guid id)        -> book is loaned (IsLoaned = true)
-                                   already loaned: InvalidOperationException
-- void ReturnBook(Guid id)      -> book is available (IsLoaned = false)
-                                   not loaned: InvalidOperationException
-- void DeleteBook(Guid id)      -> book is removed
-                                          
+- List<Book> GetBooks()                     -> all books
+- Book AddBook(string title, string author) -> new book, IsLoaned = false
+- void LoanBook(Guid id)                    -> book is loaned (IsLoaned = true)
+                                               already loaned: InvalidOperationException
+- void ReturnBook(Guid id)                  -> book is available (IsLoaned = false)
+                                               not loaned: InvalidOperationException
+- void DeleteBook(Guid id)                  -> book is removed
+                          
 Book: Id (Guid), Title (string), Author (string), IsLoaned (bool)
 Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald", false
+```
 
 Dependencies: none (books are kept in an in-memory list)
 
@@ -45,6 +49,7 @@ Dependencies: none (books are kept in an in-memory list)
 - [x] A book can be marked as returned/made available
 - [x] A book cannot be returned if it wasn't already loaned
 - [x] A book can be deleted
+
 Later questions:
 - [x] Can a user loan several books?
 - [x] Can the library add multiple copies of the same book?
