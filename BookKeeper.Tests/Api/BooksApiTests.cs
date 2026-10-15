@@ -69,4 +69,18 @@ public class BooksApiTests : IDisposable
         // Assert
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
+
+    [Fact]
+    public async Task PatchBooksReturn_LoanedBook_ReturnsNoContent()
+    {
+        // Arrange
+        var book = await CreateBookAsync();
+        await _client.PatchAsync($"/books/{book.Id}/loan", null);
+
+        // Act
+        var response = await _client.PatchAsync($"/books/{book.Id}/return", null);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
 }
