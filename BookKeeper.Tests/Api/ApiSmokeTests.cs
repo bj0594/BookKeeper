@@ -1,7 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace BookKeeper.Tests;
+namespace BookKeeper.Tests.Api;
 
 public class ApiSmokeTests
 {

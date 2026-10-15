@@ -1,5 +1,6 @@
 ﻿using BookKeeper.Core;
-namespace BookKeeper.Tests;
+
+namespace BookKeeper.Tests.Domain;
 
 public class BookServiceTests
 {
@@ -25,7 +26,7 @@ public class BookServiceTests
         _service.LoanBook(book.Id);
 
         // Assert
-        var stored = _service.GetBooks().Single(i => i.Id == book.Id);
+        var stored = _service.GetBooks().Single(b => b.Id == book.Id);
         Assert.True(stored.IsLoaned);
     }
 
@@ -51,7 +52,7 @@ public class BookServiceTests
         _service.ReturnBook(book.Id);
 
         // Assert
-        var stored = _service.GetBooks().Single(i => i.Id == book.Id);
+        var stored = _service.GetBooks().Single(b => b.Id == book.Id);
         Assert.False(stored.IsLoaned);
     }
 

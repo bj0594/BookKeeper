@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace BookKeeper.Tests;
+namespace BookKeeper.Tests.Api;
 
 public class BooksApiTests : IDisposable
 {
@@ -21,7 +21,7 @@ public class BooksApiTests : IDisposable
 
     private async Task<BookResponse> CreateBookAsync()
     {
-        var response = await _client.PostAsJsonAsync("/books", new { title = "Test Book", author = "Test Author" });
+        var response = await _client.PostAsJsonAsync("/books", new { Title = "Test Book", Author = "Test Author" });
         return (await response.Content.ReadFromJsonAsync<BookResponse>())!;
     }
 
@@ -99,7 +99,7 @@ public class BooksApiTests : IDisposable
     [Fact]
     public async Task PatchBooksLoan_AlreadyLoaned_ReturnsConflict()
     {
-        // Arrange: put the object in the state that breaks the rule (loaned)
+        // Arrange: ensures the book is already loaned before testing the conflict scenario
         var book = await CreateBookAsync();
         await _client.PatchAsync($"/books/{book.Id}/loan", null);
 
@@ -113,7 +113,7 @@ public class BooksApiTests : IDisposable
     [Fact]
     public async Task PatchBooksReturn_NotLoaned_ReturnsConflict()
     {
-        // Arrange: put the object in the state that breaks the rule (not loaned)
+        // Arrange: ensures the book has already been loaned before testing the conflict scenario
         var book = await CreateBookAsync();
 
         // Act
