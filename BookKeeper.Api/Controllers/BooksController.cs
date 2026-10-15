@@ -18,6 +18,7 @@ public class BooksController : ControllerBase
 
     [HttpPost]
     [EndpointDescription("Fill in title and author in the request body. The id in the response is used by loan, return and delete.")]
+    [ProducesResponseType(typeof(Book), StatusCodes.Status201Created)]
     public IActionResult AddBook(CreateBookRequest request)
     {
         var book = _bookService.AddBook(request.Title, request.Author);
@@ -25,13 +26,16 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<Book>), StatusCodes.Status200OK)]
     public IActionResult GetBooks()
     {
         return Ok(_bookService.GetBooks());
     }
 
     [HttpPatch("{bookId:guid}/loan")]
-    [EndpointDescription("Returns 204 No Content. Send it twice for the same book to get 409 Conflict (book is already loaned).")]
+    [EndpointDescription("Send it twice for the same book to get 409 Conflict (book is already loaned).")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
     public IActionResult LoanBook([Description(BookIdDescription)] Guid bookId)
     {
         try
@@ -46,7 +50,9 @@ public class BooksController : ControllerBase
     }
 
     [HttpPatch("{bookId:guid}/return")]
-    [EndpointDescription("Returns 204 No Content. Send it for a book that is not loaned to get 409 Conflict (book is not loaned).")]
+    [EndpointDescription("Send it for a book that is not loaned to get 409 Conflict (book is not loaned).")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
     public IActionResult ReturnBook([Description(BookIdDescription)] Guid bookId)
     {
         try
@@ -61,6 +67,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpDelete("{bookId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult DeleteBook([Description(BookIdDescription)] Guid bookId)
     {
         _bookService.DeleteBook(bookId);
