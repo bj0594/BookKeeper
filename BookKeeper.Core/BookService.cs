@@ -3,6 +3,7 @@ namespace BookKeeper.Core;
 public class BookService
 {
     private readonly List<Book> _books = [];
+
     public Book AddBook(string title, string author)
     {
         var book = new Book
@@ -45,6 +46,7 @@ public class BookService
         var book = GetBookById(bookId);
         _books.Remove(book);
     }
+    
     private Book GetBookById(Guid bookId)
     {
         return _books.First(i => i.Id == bookId);

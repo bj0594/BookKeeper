@@ -26,7 +26,7 @@ public class BooksApiTests : IDisposable
     }
 
     [Fact]
-    public async Task PostBook_ValidBook_ReturnsCreatedBook()
+    public async Task PostBooks_ValidBook_ReturnsCreatedBook()
     {
         // Arrange
         var request = new { Title = "Test Book", Author = "Test Author" };
