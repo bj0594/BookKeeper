@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.OpenApi;
 
 namespace BookKeeper.Tests;
 
@@ -33,5 +34,20 @@ public class BooksApiTests : IDisposable
         var book = await response.Content.ReadFromJsonAsync<BookResponse>();
         Assert.Equal(request.Title, book?.Title);
         Assert.Equal(request.Author, book?.Author);
+    }
+
+    [Fact]
+    public async Task GetBooks_AfterBookAdded_ReturnsOkWithList()
+    {
+        // Arrange
+        await _client.PostAsJsonAsync("/books", new { Title = "Test Book", Author = "Test Author" });
+
+        // Act
+        var response = await _client.GetAsync("/books");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var books = await response.Content.ReadFromJsonAsync<List<BookResponse>>();
+        Assert.Single(books!);
     }
 }
