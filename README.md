@@ -11,17 +11,17 @@ BookKeeper is a small library system. A user can add books, list them, loan a bo
 From the repository root:
 
 ```bash
-   dotnet test
+dotnet test
 ```
 
-This runs 14 tests:
+This runs 13 tests:
 - 6 domain tests for `BookService` (`BookKeeper.Tests/Domain`)
 - 7 API contract tests, one for each line in `Documentation/api.md` (`BookKeeper.Tests/Api`)
-- 1 smoke test that checks that the API can start in memory
 
 ## Run the API
+
 ```bash
-   dotnet run --project BookKeeper.Api
+dotnet run --project BookKeeper.Api
 ```
 
 The API runs on `http://localhost:5135`. Books are stored in memory, so they are lost when the API stops.
@@ -54,7 +54,7 @@ Open `BookKeeper.Api/BookKeeper.Api.http` in VS Code with the REST Client extens
 | `BookKeeper.Core` | Domain logic: `Book` and `BookService` |
 | `BookKeeper.Api` | REST API: controller, request type and `Program.cs` |
 | `BookKeeper.Tests/Domain` | Domain tests |
-| `BookKeeper.Tests/Api` | API contract tests and the smoke test |
+| `BookKeeper.Tests/Api` | API contract tests |
 | `Excalidraw` | Sketch of the MVP flow (`flow.excalidraw` and `flow.png`) |
 | `Documentation` | Specification and API contract |
 

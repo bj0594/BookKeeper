@@ -114,7 +114,7 @@ public class BooksApiTests : IDisposable
     [Fact]
     public async Task PatchBooksReturn_NotLoaned_ReturnsConflict()
     {
-        // Arrange: ensures the book has already been loaned before testing the conflict scenario
+        // Arrange: ensures the book is not loaned before testing the conflict scenario
         var book = await CreateBookAsync();
 
         // Act

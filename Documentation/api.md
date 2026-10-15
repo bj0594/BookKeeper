@@ -7,7 +7,7 @@ Response: 200 OK + array of all books, each with the same fields as in the POST 
 
 POST /books
 Request: { "title": "Dune", "author": "Frank Herbert" }
-Response: 201 Created + { "Id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "title": "Dune", "author": "Frank Herbert", "isLoaned": false }
+Response: 201 Created + { "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "title": "Dune", "author": "Frank Herbert", "isLoaned": false }
 
 PATCH /books/{bookId}/loan
 Request: none

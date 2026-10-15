@@ -1,6 +1,6 @@
 # Specification – BookKeeper
 ## 1 The assignment in my own words
-A library system for bookkeepers that keeps track of which books the library has and which of them are loaned out.
+A library system for librarians that keeps track of which books the library has and which of them are loaned out.
 The user can add, list, loan out, return and delete books.
 The domain logic is built with TDD and then made available through a REST API.
 Delivered as a GitHub repo with tests and a README.
@@ -38,7 +38,7 @@ BookService
 - void ReturnBook(Guid id)                  -> book is available (IsLoaned = false)
                                                not loaned: InvalidOperationException
 - void DeleteBook(Guid id)                  -> book is removed
-                          
+
 Book: Id (Guid), Title (string), Author (string), IsLoaned (bool)
 Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald", false
 ```
@@ -59,7 +59,7 @@ Later questions:
 
 ## 6 Questions, assumptions and decisions
 - Clarified: The repo will be used for the coming assignments
-- Assumption: "4–5 tests" in the grading means domain tests only
+- Assumption: "4–5 tests" in the grading means domain tests only (part 2 of the assignment asks for 4–5 tests for the domain logic)
 - Decision: 6 domain tests instead of 4–5. The assignment allows more tests when needed for the main rules of the MVP, and each of the two rules has its own test
 - Decision: Returning a book that is not loaned gives an error (InvalidOperationException)
 - Decision: The option to loan several books and/or add multiple copies of the same book is not essential to the MVP. It will not be added at this time, but might be in the future
