@@ -30,8 +30,15 @@ public class BooksController : ControllerBase
     [HttpPatch("{bookId:guid}/loan")]
     public IActionResult LoanBook(Guid bookId)
     {
-        _bookService.LoanBook(bookId);
-        return NoContent();
+        try
+        {
+            _bookService.LoanBook(bookId);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
     }
 
     [HttpPatch("{bookId:guid}/return")]
