@@ -15,14 +15,14 @@ public class BooksController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Create(CreateBookRequest request)
+    public IActionResult AddBook(CreateBookRequest request)
     {
         var book = _bookService.AddBook(request.Title, request.Author);
         return Created($"/books/{book.Id}", book);
     }
 
     [HttpGet]
-    public IActionResult GetAll()
+    public IActionResult GetBooks()
     {
         return Ok(_bookService.GetBooks());
     }
