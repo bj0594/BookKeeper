@@ -56,7 +56,7 @@ Open `BookKeeper.Api/BookKeeper.Api.http` in VS Code with the REST Client extens
 | `BookKeeper.Tests/Domain` | Domain tests |
 | `BookKeeper.Tests/Api` | API contract tests and the smoke test |
 | `Excalidraw` | Sketch of the MVP flow (`flow.excalidraw` and `flow.png`) |
-| `Documentation` | Specification, API contract and the assignment text |
+| `Documentation` | Specification and API contract |
 
 ## Documentation
 
