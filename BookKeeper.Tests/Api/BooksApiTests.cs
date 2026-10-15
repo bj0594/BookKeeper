@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.OpenApi;
 
 namespace BookKeeper.Tests;
 
@@ -33,7 +32,7 @@ public class BooksApiTests : IDisposable
         var request = new { Title = "Test Book", Author = "Test Author" };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/books", new {request.Title, request.Author});
+        var response = await _client.PostAsJsonAsync("/books", request);
 
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
