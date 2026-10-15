@@ -1,6 +1,19 @@
-@BookKeeper.Api_HostAddress = http://localhost:5135
+@host = http://localhost:5135
 
-GET {{BookKeeper.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Create a book
+POST {{host}}/books
+Content-Type: application/json
 
-###
+{ "title": "Dune", "author": "Frank Herbert" }
+
+### List all books
+GET {{host}}/books
+
+### Loan a book
+PATCH {{host}}/books/80916d42-8b64-4018-bebe-6be4730f44a3/loan
+
+### Return a book
+PATCH {{host}}/books/80916d42-8b64-4018-bebe-6be4730f44a3/return
+
+### Delete a book
+DELETE {{host}}/books/80916d42-8b64-4018-bebe-6be4730f44a3
