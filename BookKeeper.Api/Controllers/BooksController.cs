@@ -40,4 +40,11 @@ public class BooksController : ControllerBase
         _bookService.ReturnBook(bookId);
         return NoContent();
     }
+
+    [HttpDelete("{bookId:guid}")]
+    public IActionResult DeleteBook(Guid bookId)
+    {
+        _bookService.DeleteBook(bookId);
+        return NoContent();
+    }
 }
