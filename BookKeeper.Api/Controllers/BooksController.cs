@@ -44,8 +44,15 @@ public class BooksController : ControllerBase
     [HttpPatch("{bookId:guid}/return")]
     public IActionResult ReturnBook(Guid bookId)
     {
-        _bookService.ReturnBook(bookId);
-        return NoContent();
+        try
+        {
+            _bookService.ReturnBook(bookId);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
     }
 
     [HttpDelete("{bookId:guid}")]
