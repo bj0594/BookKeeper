@@ -16,6 +16,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpPost]
+    [EndpointDescription("Fill in title and author in the request body. The id in the response is used by loan, return and delete.")]
     public IActionResult AddBook(CreateBookRequest request)
     {
         var book = _bookService.AddBook(request.Title, request.Author);
@@ -29,6 +30,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpPatch("{bookId:guid}/loan")]
+    [EndpointDescription("Returns 204 No Content. Send it twice for the same book to get 409 Conflict (book is already loaned).")]
     public IActionResult LoanBook([Description("Copy the id from the response to POST /books")] Guid bookId)
     {
         try
@@ -43,6 +45,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpPatch("{bookId:guid}/return")]
+    [EndpointDescription("Returns 204 No Content. Send it for a book that is not loaned to get 409 Conflict (book is not loaned).")]
     public IActionResult ReturnBook([Description("Copy the id from the response to POST /books")] Guid bookId)
     {
         try
