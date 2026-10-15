@@ -96,4 +96,18 @@ public class BooksApiTests : IDisposable
         // Assert
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
+
+    [Fact]
+    public async Task PatchBooksLoan_AlreadyLoaned_ReturnsConflict()
+    {
+        // Arrange: put the object in the state that breaks the rule (loaned)
+        var book = await CreateBookAsync();
+        await _client.PatchAsync($"/books/{book.Id}/loan", null);
+
+        // Act
+        var response = await _client.PatchAsync($"/books/{book.Id}/loan", null);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
 }
