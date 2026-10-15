@@ -1,6 +1,6 @@
 # BookKeeper
 
-BookKeeper is a small library system. A user can add books, list them, loan a book out, return it and delete it. The domain logic was built with test-driven development (red, green, refactor), and is available through a REST API.
+BookKeeper is a small library system. A user can add books, list them, loan a book out, return it and delete it. The domain logic and the API contract were both built with test-driven development (red, green, refactor). The domain logic is available through a REST API.
 
 ## Requirements
 
@@ -10,7 +10,9 @@ BookKeeper is a small library system. A user can add books, list them, loan a bo
 
 From the repository root:
 
-    dotnet test
+```bash
+   dotnet test
+```
 
 This runs 14 tests:
 - 6 domain tests for `BookService` (`BookKeeper.Tests/Domain`)
@@ -18,8 +20,9 @@ This runs 14 tests:
 - 1 smoke test that checks that the API can start in memory
 
 ## Run the API
-
-    dotnet run --project BookKeeper.Api
+```bash
+   dotnet run --project BookKeeper.Api
+```
 
 The API runs on `http://localhost:5135`. Books are stored in memory, so they are lost when the API stops.
 
