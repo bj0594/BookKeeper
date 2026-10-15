@@ -83,4 +83,17 @@ public class BooksApiTests : IDisposable
         // Assert
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
+
+    [Fact]
+    public async Task DeleteBooks_ExistingBook_ReturnsNoContent()
+    {
+        // Arrange
+        var book = await CreateBookAsync();
+
+        // Act
+        var response = await _client.DeleteAsync($"/books/{book.Id}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
 }
