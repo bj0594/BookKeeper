@@ -1,6 +1,6 @@
+using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
 using BookKeeper.Core;
-using System.ComponentModel;
 
 namespace BookKeeper.Api.Controllers;
 
@@ -8,6 +8,7 @@ namespace BookKeeper.Api.Controllers;
 [Route("books")]
 public class BooksController : ControllerBase
 {
+    private const string BookIdDescription = "Copy the id from the response to POST /books";
     private readonly BookService _bookService;
 
     public BooksController(BookService bookService)
@@ -31,7 +32,7 @@ public class BooksController : ControllerBase
 
     [HttpPatch("{bookId:guid}/loan")]
     [EndpointDescription("Returns 204 No Content. Send it twice for the same book to get 409 Conflict (book is already loaned).")]
-    public IActionResult LoanBook([Description("Copy the id from the response to POST /books")] Guid bookId)
+    public IActionResult LoanBook([Description(BookIdDescription)] Guid bookId)
     {
         try
         {
@@ -46,7 +47,7 @@ public class BooksController : ControllerBase
 
     [HttpPatch("{bookId:guid}/return")]
     [EndpointDescription("Returns 204 No Content. Send it for a book that is not loaned to get 409 Conflict (book is not loaned).")]
-    public IActionResult ReturnBook([Description("Copy the id from the response to POST /books")] Guid bookId)
+    public IActionResult ReturnBook([Description(BookIdDescription)] Guid bookId)
     {
         try
         {
@@ -60,7 +61,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpDelete("{bookId:guid}")]
-    public IActionResult DeleteBook([Description("Copy the id from the response to POST /books")] Guid bookId)
+    public IActionResult DeleteBook([Description(BookIdDescription)] Guid bookId)
     {
         _bookService.DeleteBook(bookId);
         return NoContent();
