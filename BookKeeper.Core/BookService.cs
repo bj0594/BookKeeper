@@ -16,7 +16,7 @@ public class BookService
         return book;
     }
 
-    public List<Book> GetBooks()
+    public IReadOnlyList<Book> GetBooks()
     {
         return _books;
     }
@@ -46,9 +46,9 @@ public class BookService
         var book = GetBookById(bookId);
         _books.Remove(book);
     }
-    
+
     private Book GetBookById(Guid bookId)
     {
-        return _books.First(i => i.Id == bookId);
+        return _books.First(b => b.Id == bookId);
     }
 }

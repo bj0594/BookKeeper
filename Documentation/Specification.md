@@ -31,7 +31,7 @@ A user sees all books, picks an action, and the list is updated.
 ## 4 Interface
 ```
 BookService
-- List<Book> GetBooks()                     -> all books
+- IReadOnlyList<Book> GetBooks()            -> all books
 - Book AddBook(string title, string author) -> new book, IsLoaned = false
 - void LoanBook(Guid id)                    -> book is loaned (IsLoaned = true)
                                                already loaned: InvalidOperationException
