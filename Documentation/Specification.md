@@ -20,6 +20,7 @@ Rules:
 
 A user sees all books, picks an action, and the list is updated.
 A loaned book cannot be loaned again
+A book that is not loaned cannot be returned
 
 ## 4 Interface
 BookService
@@ -35,7 +36,7 @@ BookService
 Book: Id (Guid), Title (string), Author (string), IsLoaned (bool)
 Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald", false
 
-Dependencies: storage
+Dependencies: none (books are kept in an in-memory list)
 
 ## 5 Test list
 - [x] A new book can be added
