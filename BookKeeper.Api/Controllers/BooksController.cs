@@ -4,6 +4,7 @@ using BookKeeper.Core;
 
 namespace BookKeeper.Api.Controllers;
 
+// Connects the /books endpoints to BookService. The contract is in Documentation/api.md.
 [ApiController]
 [Route("books")]
 public class BooksController : ControllerBase
@@ -45,6 +46,7 @@ public class BooksController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
+            // An already loaned book gives 409. An unknown id also ends up here, because it throws the same exception type.
             return Conflict(ex.Message);
         }
     }
@@ -62,6 +64,7 @@ public class BooksController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
+            // A book that is not loaned gives 409. An unknown id also ends up here, because it throws the same exception type.
             return Conflict(ex.Message);
         }
     }
