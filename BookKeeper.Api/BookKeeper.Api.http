@@ -1,6 +1,6 @@
 @host = http://localhost:5135
 
-### Create a book
+# @name createBook
 POST {{host}}/books
 Content-Type: application/json
 
@@ -9,11 +9,17 @@ Content-Type: application/json
 ### List all books
 GET {{host}}/books
 
-### Loan a book
-PATCH {{host}}/books/80916d42-8b64-4018-bebe-6be4730f44a3/loan
+### Loan the book
+PATCH {{host}}/books/{{createBook.response.body.$.id}}/loan
 
-### Return a book
-PATCH {{host}}/books/80916d42-8b64-4018-bebe-6be4730f44a3/return
+### Loan the same book again (expect 409)
+PATCH {{host}}/books/{{createBook.response.body.$.id}}/loan
 
-### Delete a book
-DELETE {{host}}/books/80916d42-8b64-4018-bebe-6be4730f44a3
+### Return the book
+PATCH {{host}}/books/{{createBook.response.body.$.id}}/return
+
+### Return the same book again (expect 409)
+PATCH {{host}}/books/{{createBook.response.body.$.id}}/return
+
+### Delete the book
+DELETE {{host}}/books/{{createBook.response.body.$.id}}

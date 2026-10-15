@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using BookKeeper.Core;
+using System.ComponentModel;
 
 namespace BookKeeper.Api.Controllers;
 
@@ -28,7 +29,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpPatch("{bookId:guid}/loan")]
-    public IActionResult LoanBook(Guid bookId)
+    public IActionResult LoanBook([Description("Copy the id from the response to POST /books")] Guid bookId)
     {
         try
         {
@@ -42,7 +43,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpPatch("{bookId:guid}/return")]
-    public IActionResult ReturnBook(Guid bookId)
+    public IActionResult ReturnBook([Description("Copy the id from the response to POST /books")] Guid bookId)
     {
         try
         {
@@ -56,7 +57,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpDelete("{bookId:guid}")]
-    public IActionResult DeleteBook(Guid bookId)
+    public IActionResult DeleteBook([Description("Copy the id from the response to POST /books")] Guid bookId)
     {
         _bookService.DeleteBook(bookId);
         return NoContent();
