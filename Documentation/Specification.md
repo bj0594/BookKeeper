@@ -1,7 +1,9 @@
 # Specification – BookKeeper
 ## 1 The assignment in my own words
-A small system made into a REST API. TDD used to establish domain logic, then made available through REST API. 
-I have chosen to make a small system for managing a library. The user can add, loan out, return, delete and list books. Delivered as a GitHub repo with tests and a README.
+A library system for bookkeepers that keeps track of which books the library has and which of them are loaned out.
+The user can add, list, loan out, return and delete books.
+The domain logic is built with TDD and then made available through a REST API.
+Delivered as a GitHub repo with tests and a README.
 
 ## 2 Requirements
 Main flow: A user adds a book, sees it in the list, loans it, returns it and deletes it.
