@@ -50,4 +50,18 @@ public class BooksApiTests : IDisposable
         var books = await response.Content.ReadFromJsonAsync<List<BookResponse>>();
         Assert.Single(books!);
     }
+
+    [Fact]
+    public async Task PatchBooksLoan_ExistingBook_ReturnsNoContent()
+    {
+        // Arrange
+        var created = await _client.PostAsJsonAsync("/books", new { Title = "Test Book", Author = "Test Author" });
+        var book = await created.Content.ReadFromJsonAsync<BookResponse>();
+
+        // Act
+        var response = await _client.PatchAsync($"/books/{book!.Id}/loan", null);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
 }
