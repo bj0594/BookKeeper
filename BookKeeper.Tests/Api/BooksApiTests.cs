@@ -20,6 +20,12 @@ public class BooksApiTests : IDisposable
 
     private record BookResponse(Guid Id, string Title, string Author, bool IsLoaned);
 
+    private async Task<BookResponse> CreateBookAsync()
+    {
+        var response = await _client.PostAsJsonAsync("/books", new { title = "Test Book", author = "Test Author" });
+        return (await response.Content.ReadFromJsonAsync<BookResponse>())!;
+    }
+
     [Fact]
     public async Task PostBook_ValidBook_ReturnsCreatedBook()
     {
@@ -40,7 +46,7 @@ public class BooksApiTests : IDisposable
     public async Task GetBooks_AfterBookAdded_ReturnsOkWithList()
     {
         // Arrange
-        await _client.PostAsJsonAsync("/books", new { Title = "Test Book", Author = "Test Author" });
+        await CreateBookAsync();
 
         // Act
         var response = await _client.GetAsync("/books");
@@ -55,11 +61,10 @@ public class BooksApiTests : IDisposable
     public async Task PatchBooksLoan_ExistingBook_ReturnsNoContent()
     {
         // Arrange
-        var created = await _client.PostAsJsonAsync("/books", new { Title = "Test Book", Author = "Test Author" });
-        var book = await created.Content.ReadFromJsonAsync<BookResponse>();
+        var book = await CreateBookAsync();
 
         // Act
-        var response = await _client.PatchAsync($"/books/{book!.Id}/loan", null);
+        var response = await _client.PatchAsync($"/books/{book.Id}/loan", null);
 
         // Assert
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
