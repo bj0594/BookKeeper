@@ -20,6 +20,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=bookkeeper;Username=bookkeeper;Password=password"
+      Database__MigrateOnStartup: "true"
     ports:
       - "8080:8080"
     depends_on:

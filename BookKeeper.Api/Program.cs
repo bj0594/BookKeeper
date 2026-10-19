@@ -15,6 +15,11 @@ builder.Services.AddScoped<IBookRepository, EfBookRepository>();
 builder.Services.AddScoped<BookService>();
 
 var app = builder.Build();
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+    using var scope = app.Services.CreateScope();
+    scope.ServiceProvider.GetRequiredService<BookKeeperDbContext>().Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
 {
