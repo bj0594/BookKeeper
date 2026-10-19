@@ -1,6 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using BookKeeper.Core.Repository;
 
 namespace BookKeeper.Tests.Api;
 
@@ -12,7 +15,12 @@ public class BooksApiTests : IDisposable
     public BooksApiTests()
     {
         // xUnit creates this class once per test, so each test gets its own API with an empty book list.
-        _factory = new WebApplicationFactory<Program>();
+        _factory = new WebApplicationFactory<Program>().WithWebHostBuilder (builder =>
+            builder.ConfigureTestServices(services =>
+            {
+                // Use the fake repository for testing, so we don't need a database.
+                services.AddSingleton<IBookRepository, FakeBookRepository>();
+            }));
         _client = _factory.CreateClient();
     }
 
