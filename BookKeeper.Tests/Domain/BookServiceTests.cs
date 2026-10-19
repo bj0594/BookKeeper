@@ -1,10 +1,11 @@
 ﻿using BookKeeper.Core;
+using BookKeeper.Core.Repository;
 
 namespace BookKeeper.Tests.Domain;
 
 public class BookServiceTests
 {
-    private readonly BookService _service = new();
+    private readonly BookService _service = new(new FakeBookRepository());
 
     [Fact]
     public void AddBook_ValidBook_AddsBookToLibrary()

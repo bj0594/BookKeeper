@@ -51,7 +51,7 @@ Open `BookKeeper.Api/BookKeeper.Api.http` in VS Code with the REST Client extens
 
 | Folder | Content |
 |---|---|
-| `BookKeeper.Core` | Domain logic: `Book` and `BookService` |
+| `BookKeeper.Core` | Domain logic: `Book` and `BookService`, and the storage behind `IBookRepository` (`Repository/`) |
 | `BookKeeper.Api` | REST API: controller, request type and `Program.cs` |
 | `BookKeeper.Tests/Domain` | Domain tests |
 | `BookKeeper.Tests/Api` | API contract tests |

@@ -1,9 +1,16 @@
+using BookKeeper.Core.Repository;
+
 namespace BookKeeper.Core;
 
-// Keeps the library's books in memory and enforces the loan rules.
+// Enforces the loan rules. The books are stored through IBookRepository.
 public class BookService
 {
-    private readonly List<Book> _books = [];
+    private readonly IBookRepository _repository;
+
+    public BookService(IBookRepository repository)
+    {
+        _repository = repository;
+    }
 
     // Creates a book with a new id, not loaned, and adds it to the library.
     public Book AddBook(string title, string author)
@@ -14,14 +21,14 @@ public class BookService
             Title = title,
             Author = author
         };
-        _books.Add(book);
+        _repository.Add(book);
         return book;
     }
 
     // Returns all books. The list is read-only, so books can only be added or removed through this service.
     public IReadOnlyList<Book> GetBooks()
     {
-        return _books;
+        return _repository.GetAll();
     }
 
     // Marks the book as loaned. Throws InvalidOperationException if it is already loaned or no book has the id.
@@ -50,11 +57,11 @@ public class BookService
     public void DeleteBook(Guid bookId)
     {
         var book = GetBookById(bookId);
-        _books.Remove(book);
+        _repository.Delete(book);
     }
 
     private Book GetBookById(Guid bookId)
     {
-        return _books.First(b => b.Id == bookId);
+        return _repository.GetAll().First(b => b.Id == bookId);
     }
 }

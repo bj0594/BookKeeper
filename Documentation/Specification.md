@@ -43,7 +43,7 @@ Book: Id (Guid), Title (string), Author (string), IsLoaned (bool)
 Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald", false
 ```
 
-Dependencies: none (books are kept in an in-memory list)
+Dependencies: IBookRepository (FakeBookRepository keeps the books in memory)
 
 ## 5 Test list
 - [x] A new book can be added
@@ -64,7 +64,7 @@ Later questions:
 - Decision: Returning a book that is not loaned gives an error (InvalidOperationException)
 - Decision: The option to loan several books and/or add multiple copies of the same book is not essential to the MVP. It will not be added at this time, but might be in the future
 - Decision: Unknown id is not handled in the MVP, because the user always picks a book from the list
-- Decision: No repository. The assignment does not require one, and the service's in-memory list is enough for the MVP
+- Clarified: The instructor requires IBookRepository and FakeBookRepository before assignment 2, added as a refactor. BookService only depends on IBookRepository
 - Decision: No handling of storage failure. In-memory storage cannot fail, and the assignment does not require it
 
 - Limitation: Data is lost when the API restarts (books are stored in memory)
