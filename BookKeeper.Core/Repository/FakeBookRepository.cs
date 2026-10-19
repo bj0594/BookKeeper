@@ -19,4 +19,9 @@ public class FakeBookRepository : IBookRepository
     {
         _books.Remove(book);
     }
+
+    public void Update(Book book)
+    {
+        
+    }
 }

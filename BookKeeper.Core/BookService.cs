@@ -40,6 +40,7 @@ public class BookService
             throw new InvalidOperationException("Book is already loaned.");
         }
         book.IsLoaned = true;
+        _repository.Update(book);
     }
 
     // Marks the book as not loaned. Throws InvalidOperationException if it is not loaned or no book has the id.
@@ -51,6 +52,7 @@ public class BookService
             throw new InvalidOperationException("Book is not loaned.");
         }
         book.IsLoaned = false;
+        _repository.Update(book);
     }
 
     // Removes the book from the library. Throws InvalidOperationException if no book has the id.

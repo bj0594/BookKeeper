@@ -6,4 +6,5 @@ public interface IBookRepository
     void Add(Book book);
     IReadOnlyList<Book> GetAll();
     void Delete(Book book);
+    void Update(Book book);
 }
