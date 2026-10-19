@@ -32,14 +32,14 @@ services:
       - "traefik.http.services.api.loadbalancer.server.port=8080"
 
   pgadmin:
-      image: dpage/pgadmin4
-      environment:
-        PGADMIN_DEFAULT_EMAIL: bookkeeper@book.com
-        PGADMIN_DEFAULT_PASSWORD: password
-      ports:
-        - "5050:80"
-      depends_on:
-        - db
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: bookkeeper@book.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
 
   traefik:
     image: traefik:v3.7
