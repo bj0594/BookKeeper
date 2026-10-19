@@ -14,6 +14,9 @@ builder.Services.AddDbContext<BookKeeperDbContext>(options =>
 builder.Services.AddScoped<IBookRepository, EfBookRepository>();
 builder.Services.AddScoped<BookService>();
 
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<BookKeeperDbContext>();
+
 var app = builder.Build();
 if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
 {
@@ -32,5 +35,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
