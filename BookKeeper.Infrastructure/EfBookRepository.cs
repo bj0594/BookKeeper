@@ -3,6 +3,8 @@ using BookKeeper.Core.Repository;
 
 namespace BookKeeper.Infrastructure;
 
+// Stores the books in PostgreSQL through EF Core. Used by the API, while the tests use FakeBookRepository.
+// Every method that changes data calls SaveChanges, so the change is written to the database right away.
 public class EfBookRepository : IBookRepository
 {
     private readonly BookKeeperDbContext _db;

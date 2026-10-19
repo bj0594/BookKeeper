@@ -1,3 +1,4 @@
+# http://localhost:8080 with Docker Compose, http://localhost:5135 with dotnet run
 @host = http://localhost:8080
 
 # @name createBook

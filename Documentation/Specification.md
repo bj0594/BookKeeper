@@ -3,6 +3,7 @@
 A library system for librarians that keeps track of which books the library has and which of them are loaned out.
 The user can add, list, loan out, return and delete books.
 The domain logic is built with TDD and then made available through a REST API.
+Assignment 2: the API runs in Docker, stores the books in PostgreSQL through EF Core, and the whole system starts with Docker Compose (API, PostgreSQL, pgAdmin and Traefik), with a health check. No new functionality.
 Delivered as a GitHub repo with tests and a README.
 
 ## 2 Requirements
@@ -43,7 +44,9 @@ Book: Id (Guid), Title (string), Author (string), IsLoaned (bool)
 Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald", false
 ```
 
-Dependencies: IBookRepository (FakeBookRepository keeps the books in memory)
+Dependencies: IBookRepository
+- EfBookRepository (BookKeeper.Infrastructure) stores the books in PostgreSQL. Used by the API.
+- FakeBookRepository (BookKeeper.Core) keeps the books in memory. Used by the domain tests and the API tests.
 
 ## 5 Test list
 - [x] A new book can be added
@@ -65,14 +68,22 @@ Later questions:
 - Decision: The option to loan several books and/or add multiple copies of the same book is not essential to the MVP. It will not be added at this time, but might be in the future
 - Decision: Unknown id is not handled in the MVP, because the user always picks a book from the list
 - Clarified: The instructor requires IBookRepository and FakeBookRepository before assignment 2, added as a refactor. BookService only depends on IBookRepository
-- Decision: No handling of storage failure. In-memory storage cannot fail, and the assignment does not require it
+- Decision: No handling of storage failure. The assignment does not require it. If the database is down, the API returns 500, and `/health` reports `Unhealthy`
+- Decision (assignment 2): EF Core with PostgreSQL, in its own project (BookKeeper.Infrastructure), so BookKeeper.Core does not know about the database
+- Decision (assignment 2): BookService calls IBookRepository.Update after loan and return, so the change is saved in the database
+- Decision (assignment 2): The API runs the migrations when it starts in Docker Compose (`Database__MigrateOnStartup`), so the tables are created without manual steps
+- Decision (assignment 2): The health check also checks the database connection, so `/health` is `Unhealthy` when the API cannot reach PostgreSQL
+- Decision (assignment 2): Traefik is the ingress. It routes all traffic on port 80 to the API
+- Clarified (assignment 2): The Dockerfile is in BookKeeper.Api/, and docker-compose.yaml is in the repository root, as in the instructor's example solution
+- Decision (assignment 2): The database and pgAdmin passwords are in docker-compose.yaml. They are only for local development
 
-- Limitation: Data is lost when the API restarts (books are stored in memory)
 - Limitation: An unknown id gives 409 Conflict on loan and return, and 500 on delete (no unknown id handling in the MVP)
 - Limitation: An empty title or author is accepted
 - Limitation: The system does not track who has borrowed a book
+- Limitation: Every operation on one book loads all books from the database (`GetAll`), which is fine for a small library
 
 - New project (no existing code)
 - Web API: yes (parts 3–5)
-- Database: no (not part of the MVP)
+- Database: yes from assignment 2 (PostgreSQL with EF Core)
+- Docker: yes from assignment 2 (Dockerfile and Docker Compose)
 - CI: no (not required)

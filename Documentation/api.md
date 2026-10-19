@@ -22,4 +22,9 @@ Errors: 409 Conflict (book is not loaned)
 DELETE /books/{bookId}
 Request: none
 Response: 204 No Content
+
+GET /health
+Request: none
+Response: 200 OK + Healthy (the API can reach the database)
+Errors: 503 Service Unavailable + Unhealthy (the API cannot reach the database)
 ```

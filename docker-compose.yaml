@@ -1,4 +1,7 @@
+# Starts the whole system: docker compose up --build -d
+# The passwords are only for local development.
 services:
+  # PostgreSQL. The data is stored in the volume db_data, so it survives restarts and docker compose down.
   db:
     image: postgres:17
     environment:
@@ -15,6 +18,7 @@ services:
       timeout: 3s
       retries: 10
 
+  # The API. Waits until the database is healthy, and runs the migrations when it starts.
   api:
     build:
       context: .
@@ -28,17 +32,20 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    # Calls GET /health inside the container. docker compose ps shows (healthy) or (unhealthy).
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s
       timeout: 3s
       retries: 5
+    # Tells Traefik to send the traffic on port 80 to this service.
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=PathPrefix(`/`)"
       - "traefik.http.routers.api.entrypoints=web"
       - "traefik.http.services.api.loadbalancer.server.port=8080"
 
+  # pgAdmin on http://localhost:5050. Register the server with host db (the service name), not localhost.
   pgadmin:
     image: dpage/pgadmin4
     environment:
@@ -49,6 +56,7 @@ services:
     depends_on:
       - db
 
+  # Traefik is the ingress: http://localhost goes to the API. Dashboard on http://localhost:8081/dashboard/
   traefik:
     image: traefik:v3.7
     command:
