@@ -8,11 +8,16 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Scalar.AspNetCore" Version="2.18.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BookKeeper.Core\BookKeeper.Core.csproj" />
+    <ProjectReference Include="..\BookKeeper.Infrastructure\BookKeeper.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
