@@ -23,3 +23,6 @@ PATCH {{host}}/books/{{createBook.response.body.$.id}}/return
 
 ### Delete the book
 DELETE {{host}}/books/{{createBook.response.body.$.id}}
+
+### Check health
+GET {{host}}/health

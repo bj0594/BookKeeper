@@ -14,9 +14,11 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-  
+
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: BookKeeper.Api/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=bookkeeper;Username=bookkeeper;Password=password"
