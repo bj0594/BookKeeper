@@ -8,7 +8,7 @@ Assignment 3: the API now provides registration and login, and can create users,
 Delivered as a GitHub repo with tests and a README.
 
 ## 2 Requirements
-Main flow: A user adds a book, sees it in the list, loans it, returns it and deletes it.
+Main flow: A user logs in, adds a book, sees it in the list, loans it, returns it and deletes it.
 
 Core (MUST):
 - Add a book        ✔ AddBook_ValidBook_AddsBookToLibrary, PostBooks_ValidBook_ReturnsCreatedBook
@@ -21,6 +21,10 @@ Core (MUST):
 Rules:
 - Can't loan a book that's already loaned out  ✔ LoanBook_AlreadyLoaned_ThrowsException, PatchBooksLoan_AlreadyLoaned_ReturnsConflict
 - Can't return a book that hasn't been loaned  ✔ ReturnBook_NotLoanedBook_ThrowsException, PatchBooksReturn_NotLoaned_ReturnsConflict
+
+- A user can only view their own data
+- A user can't retrieve, alter or delete other user's data
+- Endpoints that require authorization can't be used without a valid token
 
 ## 3 Flow
 ![Flow](../Excalidraw/flow.png)
@@ -78,6 +82,8 @@ Later questions:
 - Clarified (assignment 2): The Dockerfile is in BookKeeper.Api/, and docker-compose.yaml is in the repository root, as in the instructor's example solution
 - Decision (assignment 2): The database and pgAdmin passwords are in docker-compose.yaml. They are only for local development
 
+- Assumption: I will choose the 3 ownership rules myself, until told otherwise
+
 Questions (assignment 3);
 - What are the "3 rules"?
 - The assignment states that AuthController reads the JWT and returns claums, but the assignment text only requires register and login. Does that result in a exclusive endpoint that returns claims?
@@ -91,7 +97,7 @@ Questions (assignment 3);
 - Limitation: Every operation on one book loads all books from the database (`GetAll`), which is fine for a small library
 
 - New project (no existing code)
-- Web API: yes (parts 3–5)
-- Database: yes from assignment 2 (PostgreSQL with EF Core)
-- Docker: yes from assignment 2 (Dockerfile and Docker Compose)
+- Web API: yes 
+- Database: yes(PostgreSQL with EF Core)
+- Docker: yes(Dockerfile and Docker Compose)
 - CI: no (not required)
