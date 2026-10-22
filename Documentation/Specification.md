@@ -4,6 +4,7 @@ A library system for librarians that keeps track of which books the library has 
 The user can add, list, loan out, return and delete books.
 The domain logic is built with TDD and then made available through a REST API.
 Assignment 2: the API runs in Docker, stores the books in PostgreSQL through EF Core, and the whole system starts with Docker Compose (API, PostgreSQL, pgAdmin and Traefik), with a health check. No new functionality.
+Assignment 3: the API now provides registration and login, and can create users, control passwords and generate JWT-tokens. The tokens are used to identify the user and limit data access. This will more accurately reflect a library user, not a librarian. 
 Delivered as a GitHub repo with tests and a README.
 
 ## 2 Requirements
@@ -76,6 +77,13 @@ Later questions:
 - Decision (assignment 2): Traefik is the ingress. It routes all traffic on port 80 to the API
 - Clarified (assignment 2): The Dockerfile is in BookKeeper.Api/, and docker-compose.yaml is in the repository root, as in the instructor's example solution
 - Decision (assignment 2): The database and pgAdmin passwords are in docker-compose.yaml. They are only for local development
+
+Questions (assignment 3);
+- What are the "3 rules"?
+- The assignment states that AuthController reads the JWT and returns claums, but the assignment text only requires register and login. Does that result in a exclusive endpoint that returns claims?
+- Swagger, or stay with Scalar?
+- Can the JWT-secret be placed in appsettings.json, when the the repository is public, or does it need to be placed in user-secrets or an environmental variable?
+- The assignment states another user's data "won't be returned". Is the API to respond with 404 Not Found or 403 Forbidden? 
 
 - Limitation: An unknown id gives 409 Conflict on loan and return, and 500 on delete (no unknown id handling in the MVP)
 - Limitation: An empty title or author is accepted
