@@ -4,15 +4,23 @@ A library system for librarians that keeps track of which books the library has 
 The user can add, list, loan out, return and delete books.
 The domain logic is built with TDD and then made available through a REST API.
 Assignment 2: the API runs in Docker, stores the books in PostgreSQL through EF Core, and the whole system starts with Docker Compose (API, PostgreSQL, pgAdmin and Traefik), with a health check. No new functionality.
-Assignment 3: the API now provides registration and login, and can create users, control passwords and generate JWT-tokens. The tokens are used to identify the user and limit data access. There are two types of users: librarians and library card holders.
+Assignment 3: the API now provides registration and login, and can create users, control passwords and generate JWT-tokens. The tokens are used to identify the user and limit data access. There are two types of users: librarians and library users.
 Delivered as a GitHub repo with tests and a README.
 
 ## 2 Requirements
-Main flow: A user logs in, adds a book, sees it in the list, loans it, returns it and deletes it.
+Main flow;
+A user creates an account, chooses to be a librarian or library user, logs in.
+
+If librarian;
+Adds a book, sees it in the list, deletes it.
+
+I library user;
+Sees a book in the list, loans it, sees a list of their loans, returns it.
 
 Core (MUST):
 - Add a book        ✔ AddBook_ValidBook_AddsBookToLibrary, PostBooks_ValidBook_ReturnsCreatedBook
 - List all books    ✔ AddBook_ValidBook_AddsBookToLibrary (via GetBooks), GetBooks_AfterBookAdded_ReturnsOkWithList
+- List own loans 
 - Loan a book       ✔ LoanBook_ExistingBook_BecomesLoaned, PatchBooksLoan_ExistingBook_ReturnsNoContent
 - Return a book     ✔ ReturnBook_ExistingLoanedBook_BecomesNotLoaned, PatchBooksReturn_LoanedBook_ReturnsNoContent
 - Delete a book     ✔ DeleteBook_ExistingBook_RemovesBookFromLibrary, DeleteBooks_ExistingBook_ReturnsNoContent
@@ -21,18 +29,21 @@ Core (MUST):
 Rules:
 - Can't loan a book that's already loaned out  ✔ LoanBook_AlreadyLoaned_ThrowsException, PatchBooksLoan_AlreadyLoaned_ReturnsConflict
 - Can't return a book that hasn't been loaned  ✔ ReturnBook_NotLoanedBook_ThrowsException, PatchBooksReturn_NotLoaned_ReturnsConflict
+- More than one librarian can't be created
+- Only a librarian can add or delete books
+- Only a library user can loan and return books
+- Can't delete a loaned out book 
+- Both the librarian and library users can see the list of books available
 
-- A user can only view their own data
-- A user can't retrieve, alter or delete other user's data
-- Endpoints that require authorization can't be used without a valid token
+Ownership rules;
+- A user can only view their own loans
+- A user can't retrieve, alter or delete other user's loans
+- Endpoints that require authorization can't be used without a valid token (401)
 
 ## 3 Flow
 ![Flow](../Excalidraw/flow.png)
 
-A user sees all books, picks an action, and the list is updated.
-
-- A loaned book cannot be loaned again
-- A book that is not loaned cannot be returned
+A user logs in, sees all books, picks an action, and the list is updated.
 
 ## 4 Interface
 ```
@@ -86,7 +97,7 @@ Later questions:
 - Decision (assignment 3): The JWT secret is in appsettings.json (the assignment asks for it)
 - Decision (assignment 3): Another user's data gives 403 Forbidden (most accurately represents the user experience)
 - Decision (assignment 3): Scalar stays as the API reference, also for the token (already used in the project)
-- Decision (assignment 3): Two types of users, librarian and library card holder (roles). Data that belongs to a user still has a user id
+- Decision (assignment 3): Two types of users, librarian and library user (roles). Data that belongs to a user still has a user id
 
 - Limitation: An unknown id gives 409 Conflict on loan and return, and 500 on delete (no unknown id handling in the MVP)
 - Limitation: An empty title or author is accepted
