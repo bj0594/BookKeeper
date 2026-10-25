@@ -4,7 +4,7 @@ A library system for librarians that keeps track of which books the library has 
 The user can add, list, loan out, return and delete books.
 The domain logic is built with TDD and then made available through a REST API.
 Assignment 2: the API runs in Docker, stores the books in PostgreSQL through EF Core, and the whole system starts with Docker Compose (API, PostgreSQL, pgAdmin and Traefik), with a health check. No new functionality.
-Assignment 3: the API now provides registration and login, and can create users, control passwords and generate JWT-tokens. The tokens are used to identify the user and limit data access. This will more accurately reflect a library user, not a librarian. 
+Assignment 3: the API now provides registration and login, and can create users, control passwords and generate JWT-tokens. The tokens are used to identify the user and limit data access. There are two types of users: librarians and library card holders.
 Delivered as a GitHub repo with tests and a README.
 
 ## 2 Requirements
@@ -82,22 +82,16 @@ Later questions:
 - Clarified (assignment 2): The Dockerfile is in BookKeeper.Api/, and docker-compose.yaml is in the repository root, as in the instructor's example solution
 - Decision (assignment 2): The database and pgAdmin passwords are in docker-compose.yaml. They are only for local development
 
-- Assumption: I will choose the 3 ownership rules myself, until told otherwise
-
-Questions (assignment 3);
-- What are the "3 rules"?
-- The assignment states that AuthController reads the JWT and returns claums, but the assignment text only requires register and login. Does that result in a exclusive endpoint that returns claims?
-- Swagger, or stay with Scalar?
-- Can the JWT-secret be placed in appsettings.json, when the the repository is public, or does it need to be placed in user-secrets or an environmental variable?
-- The assignment states another user's data "won't be returned". Is the API to respond with 404 Not Found or 403 Forbidden? 
+- Clarified (assignment 3): Only the assignment text applies. The grading criteria at the bottom of the assignment, the guide and the deadline are not taken into account
+- Decision (assignment 3): The JWT secret is in appsettings.json (the assignment asks for it)
+- Decision (assignment 3): Another user's data gives 403 Forbidden (most accurately represents the user experience)
+- Decision (assignment 3): Scalar stays as the API reference, also for the token (already used in the project)
+- Decision (assignment 3): Two types of users, librarian and library card holder (roles). Data that belongs to a user still has a user id
 
 - Limitation: An unknown id gives 409 Conflict on loan and return, and 500 on delete (no unknown id handling in the MVP)
 - Limitation: An empty title or author is accepted
 - Limitation: The system does not track who has borrowed a book
 - Limitation: Every operation on one book loads all books from the database (`GetAll`), which is fine for a small library
 
-- New project (no existing code)
-- Web API: yes 
-- Database: yes(PostgreSQL with EF Core)
-- Docker: yes(Dockerfile and Docker Compose)
-- CI: no (not required)
+- Decision (assignment 3): Docker stays as it is (not part of this assignment)
+- Decision (assignment 3): No CI (not required)
