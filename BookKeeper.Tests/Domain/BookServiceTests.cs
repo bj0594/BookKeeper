@@ -5,7 +5,7 @@ namespace BookKeeper.Tests.Domain;
 
 public class BookServiceTests
 {
-    private readonly BookService _service = new(new FakeBookRepository());
+    private readonly BookService _service = new(new FakeBookRepository(), new FakeLoanRepository());
 
     [Fact]
     public void AddBook_ValidBook_AddsBookToLibrary()

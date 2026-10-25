@@ -20,6 +20,7 @@ public class BooksApiTests : IDisposable
             {
                 // Use the fake repository for testing, so we don't need a database.
                 services.AddSingleton<IBookRepository, FakeBookRepository>();
+                services.AddSingleton<ILoanRepository, FakeLoanRepository>();
             }));
         _client = _factory.CreateClient();
     }

@@ -6,10 +6,12 @@ namespace BookKeeper.Core;
 public class BookService
 {
     private readonly IBookRepository _repository;
+    private readonly ILoanRepository _loanRepository;
 
-    public BookService(IBookRepository repository)
+    public BookService(IBookRepository repository, ILoanRepository loanRepository)
     {
         _repository = repository;
+        _loanRepository = loanRepository;
     }
 
     // Creates a book with a new id, not loaned, and adds it to the library.
