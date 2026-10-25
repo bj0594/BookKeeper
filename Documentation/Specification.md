@@ -1,4 +1,5 @@
 # Specification – BookKeeper
+
 ## 1 The assignment in my own words
 A library system for librarians that keeps track of which books the library has and which of them are loaned out.
 The user can add, list, loan out, return and delete books.
@@ -8,19 +9,20 @@ Assignment 3: the API now provides registration and login, and can create users,
 Delivered as a GitHub repo with tests and a README.
 
 ## 2 Requirements
-Main flow;
+Main flow (assignment 3):
 A user creates an account, chooses to be a librarian or library user, logs in.
 
-If librarian;
+If librarian:
 Adds a book, sees it in the list, deletes it.
 
-I library user;
-Sees a book in the list, loans it, sees a list of their loans, returns it.
+If library user:
+Sees an available book in the list, loans it, sees a list of their loans, returns it.
 
 Core (MUST):
 - Add a book        ✔ AddBook_ValidBook_AddsBookToLibrary, PostBooks_ValidBook_ReturnsCreatedBook
 - List all books    ✔ AddBook_ValidBook_AddsBookToLibrary (via GetBooks), GetBooks_AfterBookAdded_ReturnsOkWithList
-- List own loans 
+- List all available books (assignment 3)
+- List own loans (assignment 3)
 - Loan a book       ✔ LoanBook_ExistingBook_BecomesLoaned, PatchBooksLoan_ExistingBook_ReturnsNoContent
 - Return a book     ✔ ReturnBook_ExistingLoanedBook_BecomesNotLoaned, PatchBooksReturn_LoanedBook_ReturnsNoContent
 - Delete a book     ✔ DeleteBook_ExistingBook_RemovesBookFromLibrary, DeleteBooks_ExistingBook_ReturnsNoContent
@@ -29,40 +31,47 @@ Core (MUST):
 Rules:
 - Can't loan a book that's already loaned out  ✔ LoanBook_AlreadyLoaned_ThrowsException, PatchBooksLoan_AlreadyLoaned_ReturnsConflict
 - Can't return a book that hasn't been loaned  ✔ ReturnBook_NotLoanedBook_ThrowsException, PatchBooksReturn_NotLoaned_ReturnsConflict
-- More than one librarian can't be created
-- Only a librarian can add or delete books
-- Only a library user can loan and return books
-- Can't delete a loaned out book 
-- Both the librarian and library users can see the list of books available
+- More than one librarian can't be created (assignment 3)
+- Only a librarian can add or delete books (assignment 3)
+- Only a library user can loan and return books (assignment 3)
+- Can't delete a loaned out book (assignment 3)
+- A librarian can see the whole list of every book (assignment 3)
+- A library user can only see available books (assignment 3)
 
-Ownership rules;
-- A user can only view their own loans
-- A user can't retrieve, alter or delete other user's loans
-- Endpoints that require authorization can't be used without a valid token (401)
+Ownership rules:
+- A user can only view their own loans (assignment 3)
+- A user can't return another user's loan (assignment 3)
+- Endpoints that require authorization can't be used without a valid token (401) (assignment 3)
 
 ## 3 Flow
 ![Flow](../Excalidraw/flow.png)
 
-A user logs in, sees all books, picks an action, and the list is updated.
+A user registers with a role and logs in. A librarian sees all books and adds or deletes one. A library user sees the available books, loans one, sees their loans and returns it.
 
 ## 4 Interface
 ```
 BookService
-- IReadOnlyList<Book> GetBooks()            -> all books
-- Book AddBook(string title, string author) -> new book, IsLoaned = false
-- void LoanBook(Guid id)                    -> book is loaned (IsLoaned = true)
-                                               already loaned: InvalidOperationException
-- void ReturnBook(Guid id)                  -> book is available (IsLoaned = false)
-                                               not loaned: InvalidOperationException
-- void DeleteBook(Guid id)                  -> book is removed
+- IReadOnlyList<Book> GetBooks()                   -> all books
+- IReadOnlyList<Book> GetAvailableBooks()          -> books without an active loan
+- Book AddBook(string title, string author)        -> new book
+- void LoanBook(Guid id, Guid userId)              -> a new loan for the user
+                                                      already loaned: InvalidOperationException
+- IReadOnlyList<Loan> GetLoans(Guid userId)        -> the user's loans
+- void ReturnBook(Guid id, Guid userId)            -> the loan is ended, the book is available
+                                                      not loaned: InvalidOperationException
+                                                      another user's loan: UnauthorizedAccessException
+- void DeleteBook(Guid id)                         -> book is removed
+                                                      book has active loan: InvalidOperationException
 
-Book: Id (Guid), Title (string), Author (string), IsLoaned (bool)
-Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald", false
+Book: Id (Guid), Title (string), Author (string)
+Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald"
+Loan: Id (Guid), BookId (Guid), UserId (Guid)
+Example: 8b1d..., 3f2c..., 2a6f...
 ```
 
-Dependencies: IBookRepository
-- EfBookRepository (BookKeeper.Infrastructure) stores the books in PostgreSQL. Used by the API.
-- FakeBookRepository (BookKeeper.Core) keeps the books in memory. Used by the domain tests and the API tests.
+Dependencies: IBookRepository and ILoanRepository
+- EfBookRepository and EfLoanRepository (BookKeeper.Infrastructure) store the books and loans in PostgreSQL. Used by the API.
+- FakeBookRepository and FakeLoanRepository (BookKeeper.Core) keep the books and loans in memory. Used by the domain tests and the API tests.
 
 ## 5 Test list
 - [x] A new book can be added
@@ -71,6 +80,14 @@ Dependencies: IBookRepository
 - [x] A book can be marked as returned/made available
 - [x] A book cannot be returned if it wasn't already loaned
 - [x] A book can be deleted
+- [ ] A loan registers loanee
+- [ ] A loaned book can't be deleted
+- [ ] List only your own loans
+- [ ] The list of available books won't show loaned books
+- [ ] User can't return other's loans
+
+Manual checks:
+- [ ] Check if data is stored properly in PostgreSQL
 
 Later questions:
 - [x] Can a user loan several books?
@@ -98,10 +115,13 @@ Later questions:
 - Decision (assignment 3): Another user's data gives 403 Forbidden (most accurately represents the user experience)
 - Decision (assignment 3): Scalar stays as the API reference, also for the token (already used in the project)
 - Decision (assignment 3): Two types of users, librarian and library user (roles). Data that belongs to a user still has a user id
+- Decision (assignment 3): The role is chosen at registration, and only one librarian can be created (the system is a single library with one librarian)
+- Decision (assignment 3): A loan is its own type, to better simulate a real digital library
+- Decision (assignment 3): Book no longer has IsLoaned. A book is loaned when it has an active loan, so the information is only stored one place
+- Decision (assignment 3): BookService now depends on both IBookRepository and ILoanRepository, and still only talks to the repository interfaces
 
 - Limitation: An unknown id gives 409 Conflict on loan and return, and 500 on delete (no unknown id handling in the MVP)
 - Limitation: An empty title or author is accepted
-- Limitation: The system does not track who has borrowed a book
 - Limitation: Every operation on one book loads all books from the database (`GetAll`), which is fine for a small library
 
 - Decision (assignment 3): Docker stays as it is (not part of this assignment)
