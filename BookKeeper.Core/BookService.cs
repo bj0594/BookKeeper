@@ -80,6 +80,6 @@ public class BookService
 
     public IReadOnlyList<Book> GetLoans(Guid userId)
     {
-        throw new NotImplementedException();   
+        return _repository.GetLoanedBy(userId);
     } 
 }

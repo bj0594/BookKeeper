@@ -7,4 +7,5 @@ public interface IBookRepository
     IReadOnlyList<Book> GetAll();
     void Delete(Book book);
     void Update(Book book);
+    IReadOnlyList<Book> GetLoanedBy(Guid userId);
 }

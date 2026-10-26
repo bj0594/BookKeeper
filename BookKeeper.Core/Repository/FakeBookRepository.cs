@@ -23,4 +23,6 @@ public class FakeBookRepository : IBookRepository
     {
         // Nothing to do: Book is a reference type, so the book in the list is already the changed object.
     }
+
+    public IReadOnlyList<Book> GetLoanedBy(Guid userId) => _books.Where(b => b.LoanedByUserId == userId).ToList();
 }

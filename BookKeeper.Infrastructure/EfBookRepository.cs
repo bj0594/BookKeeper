@@ -33,4 +33,6 @@ public class EfBookRepository : IBookRepository
         _db.Books.Remove(book);
         _db.SaveChanges();
     }
+
+    public IReadOnlyList<Book> GetLoanedBy(Guid userId) => _db.Books.Where(b => b.LoanedByUserId == userId).ToList();
 }
