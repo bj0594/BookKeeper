@@ -41,7 +41,7 @@ public class BooksController : ControllerBase
     {
         try
         {
-            _bookService.LoanBook(bookId);
+            _bookService.LoanBook(bookId, Guid.Empty); // replaced by the logged-in user's id in later commit
             return NoContent();
         }
         catch (InvalidOperationException ex)

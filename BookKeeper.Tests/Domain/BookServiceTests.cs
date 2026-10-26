@@ -7,7 +7,7 @@ namespace BookKeeper.Tests.Domain;
 public class BookServiceTests
 {
     private readonly BookService _service = new(new FakeBookRepository());
-
+    private readonly Guid _userId = Guid.NewGuid();
     private Book AddBook() => _service.AddBook("1984", "George Orwell");
 
     [Fact]
@@ -27,7 +27,7 @@ public class BookServiceTests
         var book = AddBook();
 
         // Act
-        _service.LoanBook(book.Id);
+        _service.LoanBook(book.Id, _userId);
 
         // Assert
         var stored = _service.GetBooks().Single(b => b.Id == book.Id);
@@ -39,10 +39,10 @@ public class BookServiceTests
     {
         // Arrange
         var book = AddBook();
-        _service.LoanBook(book.Id);
+        _service.LoanBook(book.Id, _userId);
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => _service.LoanBook(book.Id));
+        Assert.Throws<InvalidOperationException>(() => _service.LoanBook(book.Id, _userId));
     }
 
     [Fact]
@@ -50,7 +50,7 @@ public class BookServiceTests
     {
         // Arrange
         var book = AddBook();
-        _service.LoanBook(book.Id);
+        _service.LoanBook(book.Id, _userId);
 
         // Act
         _service.ReturnBook(book.Id);
@@ -88,7 +88,7 @@ public class BookServiceTests
     {
         // Arrange
         var book = AddBook();
-        _service.LoanBook(book.Id);
+        _service.LoanBook(book.Id, _userId);
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => _service.DeleteBook(book.Id));
@@ -100,7 +100,7 @@ public class BookServiceTests
         // Arrange
         var book = AddBook();
         var loanedBook = AddBook();
-        _service.LoanBook(loanedBook.Id);
+        _service.LoanBook(loanedBook.Id, _userId);
 
         // Act
         var result = _service.GetAvailableBooks();
@@ -109,4 +109,18 @@ public class BookServiceTests
         var found = Assert.Single(result);
         Assert.Equal(book.Id, found.Id);
     }
+
+    [Fact]
+    public void LoanBook_ExistingBook_SetsLoanedByUserId()
+    {
+        // Arrange
+        var book = AddBook();
+        var userId = Guid.NewGuid();
+
+        // Act
+        _service.LoanBook(book.Id, userId);
+
+        // Assert
+        Assert.Equal(userId, book.LoanedByUserId);
+    }    
 }
