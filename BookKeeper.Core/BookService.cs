@@ -33,6 +33,7 @@ public class BookService
         return _repository.GetAll();
     }
 
+    // Returns only available/not loaned books. 
     public IReadOnlyList<Book> GetAvailableBooks()
     {
         return _repository.GetAll().Where(b => !b.IsLoaned).ToList();

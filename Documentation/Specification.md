@@ -83,7 +83,7 @@ Dependencies: IBookRepository and ILoanRepository
 - [ ] A loan registers loanee
 - [x] A loaned book can't be deleted
 - [ ] List only your own loans
-- [ ] The list of available books won't show loaned books
+- [x] The list of available books won't show loaned books
 - [ ] User can't return other's loans
 
 Manual checks:
