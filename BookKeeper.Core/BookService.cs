@@ -55,7 +55,7 @@ public class BookService
         _repository.Update(book);
     }
 
-    // Marks the book as not loaned. Throws InvalidOperationException if it is not loaned or no book has the id.
+    // Marks the book as not loaned. Throws InvalidOperationException if it is not loaned or no book has the id
     // and UnauthorizedAccessException if another user has loaned it.
     public void ReturnBook(Guid bookId, Guid userId)
     {
@@ -73,6 +73,7 @@ public class BookService
     }
 
     // Removes the book from the library. Throws InvalidOperationException if no book has the id.
+    // Throws InvalidOperationException if deleting a loaned book.
     public void DeleteBook(Guid bookId)
     {
         var book = GetBookById(bookId);

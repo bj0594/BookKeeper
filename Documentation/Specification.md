@@ -21,8 +21,10 @@ Sees an available book in the list, loans it, sees a list of their loans, return
 Core (MUST):
 - Add a book        ✔ AddBook_ValidBook_AddsBookToLibrary, PostBooks_ValidBook_ReturnsCreatedBook
 - List all books    ✔ AddBook_ValidBook_AddsBookToLibrary (via GetBooks), GetBooks_AfterBookAdded_ReturnsOkWithList
-- List all available books (assignment 3)
-- List own loans (assignment 3)
+- List all available 
+  books (assignment 3) ✔ GetAvailableBooks_OneIsLoaned_ReturnsOnlyTheOther
+- List own loans 
+  (assignment 3)    ✔ GetLoans_TwoUsers_ReturnsOnlyOwn
 - Loan a book       ✔ LoanBook_ExistingBook_BecomesLoaned, PatchBooksLoan_ExistingBook_ReturnsNoContent
 - Return a book     ✔ ReturnBook_ExistingLoanedBook_BecomesNotLoaned, PatchBooksReturn_LoanedBook_ReturnsNoContent
 - Delete a book     ✔ DeleteBook_ExistingBook_RemovesBookFromLibrary, DeleteBooks_ExistingBook_ReturnsNoContent
@@ -34,13 +36,13 @@ Rules:
 - More than one librarian can't be created (assignment 3)
 - Only a librarian can add or delete books (assignment 3)
 - Only a library user can loan and return books (assignment 3)
-- Can't delete a loaned out book (assignment 3)
+- Can't delete a loaned out book (assignment 3) ✔ DeleteBook_AlreadyLoaned_ThrowsInvalidOperationException
 - A librarian can see the whole list of every book (assignment 3)
 - A library user can only see available books (assignment 3)
 
 Ownership rules:
-- A user can only view their own loans (assignment 3)
-- A user can't return another user's loan (assignment 3)
+- A user can only view their own loans (assignment 3) ✔ GetLoans_TwoUsers_ReturnsOnlyOwn
+- A user can't return another user's loan (assignment 3) ✔ ReturnBook_OtherUsersLoan_ThrowsUnauthorizedAccessException
 - Endpoints that require authorization can't be used without a valid token (401) (assignment 3)
 
 ## 3 Flow
@@ -63,8 +65,8 @@ BookService
 - void DeleteBook(Guid id)                         -> book is removed
                                                       book is loaned: InvalidOperationException
 
-Book: Id (Guid), Title (string), Author (string), LoanedByUserId (Guid?, empty when the book is available)
-Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald", 2a6f...
+Book: Id (Guid), Title (string), Author (string), LoanedByUserId (Guid?, empty when the book is available), IsLoaned (bool, true when LoanedByUserId has a value)
+Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald", 2a6f..., true
 ```
 
 Dependencies: IBookRepository
@@ -83,7 +85,7 @@ Dependencies: IBookRepository
 - [x] List only your own loans
 - [x] The list of available books won't show loaned books
 - [x] User can't return other's loans
-- [ ] A returned book is no longer in the user's loan
+- [x] A returned book is no longer in the user's loan
 
 Manual checks:
 - [ ] Check if data is stored properly in PostgreSQL
