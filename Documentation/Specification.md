@@ -78,7 +78,7 @@ Dependencies: IBookRepository
 - [x] A book can be marked as returned/made available
 - [x] A book cannot be returned if it wasn't already loaned
 - [x] A book can be deleted
-- [ ] A loan registers loanee
+- [x] A loan registers loanee
 - [x] A loaned book can't be deleted
 - [ ] List only your own loans
 - [x] The list of available books won't show loaned books

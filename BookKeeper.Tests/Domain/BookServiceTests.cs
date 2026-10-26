@@ -122,5 +122,23 @@ public class BookServiceTests
 
         // Assert
         Assert.Equal(userId, book.LoanedByUserId);
+    }
+
+    [Fact]
+    public void GetLoans_TwoUsers_ReturnsOnlyOwn()
+    {
+        // Arrange
+        var ownBook = AddBook();
+        var otherBook = AddBook();
+        _service.LoanBook(ownBook.Id, _userId);
+        _service.LoanBook(otherBook.Id, Guid.NewGuid());
+
+        // Act
+        var result = _service.GetLoans(_userId);
+
+        // Assert
+        var found = Assert.Single(result);
+        Assert.Equal(ownBook.Id, found.Id);
+
     }    
 }

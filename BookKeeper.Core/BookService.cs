@@ -37,7 +37,7 @@ public class BookService
         return [.. _repository.GetAll().Where(b => !b.IsLoaned)];
     }
 
-    // Marks the book as loaned. Throws InvalidOperationException if it is already loaned or no book has the id.
+    // Marks the book as loaned by the user. Throws InvalidOperationException if it is already loaned or no book has the id.
     public void LoanBook(Guid bookId, Guid userId)
     {
         var book = GetBookById(bookId);
@@ -77,4 +77,9 @@ public class BookService
     {
         return _repository.GetAll().First(b => b.Id == bookId);
     }
+
+    public IReadOnlyList<Book> GetLoans(Guid userId)
+    {
+        throw new NotImplementedException();   
+    } 
 }
