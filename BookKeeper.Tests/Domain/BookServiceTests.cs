@@ -1,5 +1,6 @@
 ﻿using BookKeeper.Core;
 using BookKeeper.Core.Repository;
+using Microsoft.AspNetCore.Mvc.Controllers;
 
 namespace BookKeeper.Tests.Domain;
 
@@ -91,5 +92,21 @@ public class BookServiceTests
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => _service.DeleteBook(book.Id));
+    }
+
+    [Fact]
+    public void GetAvailableBooks_OneIsLoaned_ReturnsOnlyTheOther()
+    {
+        // Arrange
+        var book = AddBook();
+        var loanedBook = AddBook();
+        _service.LoanBook(loanedBook.Id);
+
+        // Act
+        var result = _service.GetAvailableBooks();
+
+        // Assert
+        var found = Assert.Single(result);
+        Assert.Equal(book.Id, found.Id);
     }
 }
