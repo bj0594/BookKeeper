@@ -150,4 +150,19 @@ public class BookServiceTests
         // Act + Assert
         Assert.Throws<UnauthorizedAccessException>(() => _service.ReturnBook(book.Id, _userId));
     }
+
+    [Fact]
+    public void ReturnBook_LoanedBook_RemovesItFromGetLoans()
+    {
+        // Arrange
+        var book = AddBook();
+        _service.LoanBook(book.Id, _userId);
+
+        // Act
+        _service.ReturnBook(book.Id, _userId);
+
+        // Assert
+        Assert.Empty(_service.GetLoans(_userId));
+
+    }
 }

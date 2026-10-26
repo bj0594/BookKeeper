@@ -82,7 +82,7 @@ Dependencies: IBookRepository
 - [x] A loaned book can't be deleted
 - [x] List only your own loans
 - [x] The list of available books won't show loaned books
-- [ ] User can't return other's loans
+- [x] User can't return other's loans
 - [ ] A returned book is no longer in the user's loan
 
 Manual checks:
