@@ -63,7 +63,7 @@ public class BookService
         var book = GetBookById(bookId);
         if (book.IsLoaned)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException("Book must be returned before deleting.");
         }
         _repository.Delete(book);
     }
