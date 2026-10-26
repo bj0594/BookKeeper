@@ -70,6 +70,7 @@ public class BookService
             throw new UnauthorizedAccessException("Book is loaned by another user.");
         }
         book.IsLoaned = false;
+        book.LoanedByUserId = null;
         _repository.Update(book);
     }
 
