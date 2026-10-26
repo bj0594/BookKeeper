@@ -46,6 +46,7 @@ public class BookService
             throw new InvalidOperationException("Book is already loaned.");
         }
         book.IsLoaned = true;
+        book.LoanedByUserId = userId;
         _repository.Update(book);
     }
 
