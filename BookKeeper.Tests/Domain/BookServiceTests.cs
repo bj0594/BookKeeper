@@ -52,7 +52,7 @@ public class BookServiceTests
         _service.LoanBook(book.Id, _userId);
 
         // Act
-        _service.ReturnBook(book.Id);
+        _service.ReturnBook(book.Id, _userId);
 
         // Assert
         var stored = _service.GetBooks().Single(b => b.Id == book.Id);
@@ -66,7 +66,7 @@ public class BookServiceTests
         var book = AddBook();
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => _service.ReturnBook(book.Id));
+        Assert.Throws<InvalidOperationException>(() => _service.ReturnBook(book.Id, _userId));
     }
 
     [Fact]
@@ -138,5 +138,16 @@ public class BookServiceTests
         // Assert
         var found = Assert.Single(result);
         Assert.Equal(ownBook.Id, found.Id);
+    }
+
+    [Fact]
+    public void ReturnBook_OtherUsersLoan_ThrowsUnauthorizedAccessException()
+    {
+        // Arrange
+        var book = AddBook();
+        _service.LoanBook(book.Id, Guid.NewGuid());
+
+        // Act + Assert
+        Assert.Throws<UnauthorizedAccessException>(() => _service.ReturnBook(book.Id, _userId));
     }    
 }

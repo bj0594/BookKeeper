@@ -57,7 +57,7 @@ public class BookService
     }
 
     // Marks the book as not loaned. Throws InvalidOperationException if it is not loaned or no book has the id.
-    public void ReturnBook(Guid bookId)
+    public void ReturnBook(Guid bookId, Guid userId)
     {
         var book = GetBookById(bookId);
         if (!book.IsLoaned)

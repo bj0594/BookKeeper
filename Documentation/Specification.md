@@ -80,9 +80,10 @@ Dependencies: IBookRepository
 - [x] A book can be deleted
 - [x] A loan registers loanee
 - [x] A loaned book can't be deleted
-- [ ] List only your own loans
+- [x] List only your own loans
 - [x] The list of available books won't show loaned books
 - [ ] User can't return other's loans
+- [ ] A returned book is no longer in the user's loan
 
 Manual checks:
 - [ ] Check if data is stored properly in PostgreSQL

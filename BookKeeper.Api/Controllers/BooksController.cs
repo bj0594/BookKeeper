@@ -59,7 +59,7 @@ public class BooksController : ControllerBase
     {
         try
         {
-            _bookService.ReturnBook(bookId);
+            _bookService.ReturnBook(bookId, Guid.Empty);
             return NoContent();
         }
         catch (InvalidOperationException ex)
