@@ -7,13 +7,13 @@ public class BookServiceTests
 {
     private readonly BookService _service = new(new FakeBookRepository(), new FakeLoanRepository());
 
-
+    private Book AddBook() => _service.AddBook("1984", "George Orwell");
 
     [Fact]
     public void AddBook_ValidBook_AddsBookToLibrary()
     {
         // Act
-        _service.AddBook("The Great Gatsby", "F. Scott Fitzgerald");
+        AddBook();
 
         // Assert
         Assert.Single(_service.GetBooks());
@@ -23,7 +23,7 @@ public class BookServiceTests
     public void LoanBook_ExistingBook_BecomesLoaned()
     {
         // Arrange
-        var book = _service.AddBook("1984", "George Orwell");
+        var book = AddBook();
 
         // Act
         _service.LoanBook(book.Id);
@@ -37,7 +37,7 @@ public class BookServiceTests
     public void LoanBook_AlreadyLoaned_ThrowsException()
     {
         // Arrange
-        var book = _service.AddBook("To Kill a Mockingbird", "Harper Lee");
+        var book = AddBook();
         _service.LoanBook(book.Id);
 
         // Act & Assert
@@ -48,7 +48,7 @@ public class BookServiceTests
     public void ReturnBook_ExistingLoanedBook_BecomesNotLoaned()
     {
         // Arrange
-        var book = _service.AddBook("Pride and Prejudice", "Jane Austen");
+        var book = AddBook();
         _service.LoanBook(book.Id);
 
         // Act
@@ -63,7 +63,7 @@ public class BookServiceTests
     public void ReturnBook_NotLoanedBook_ThrowsException()
     {
         // Arrange
-        var book = _service.AddBook("Moby Dick", "Herman Melville");
+        var book = AddBook();
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => _service.ReturnBook(book.Id));
@@ -73,7 +73,7 @@ public class BookServiceTests
     public void DeleteBook_ExistingBook_RemovesBookFromLibrary()
     {
         // Arrange
-        var book = _service.AddBook("The Catcher in the Rye", "J.D. Salinger");
+        var book = AddBook();
 
         // Act
         _service.DeleteBook(book.Id);
@@ -86,7 +86,7 @@ public class BookServiceTests
     public void DeleteBook_AlreadyLoaned_ThrowsInvalidOperationException()
     {
         // Arrange
-        var book = _service.AddBook("The Hobbit", "J.R.R. Tolkien");
+        var book = AddBook();
         _service.LoanBook(book.Id);
 
         // Act & Assert
