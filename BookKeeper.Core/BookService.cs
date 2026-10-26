@@ -33,9 +33,9 @@ public class BookService
         return _repository.GetAll();
     }
 
-    public List<Book> GetAvailableBooks()
+    public IReadOnlyList<Book> GetAvailableBooks()
     {
-        throw new NotImplementedException();
+        return _repository.GetAll().Where(b => !b.IsLoaned).ToList();
     }
 
     // Marks the book as loaned. Throws InvalidOperationException if it is already loaned or no book has the id.
