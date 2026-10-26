@@ -61,6 +61,10 @@ public class BookService
     public void DeleteBook(Guid bookId)
     {
         var book = GetBookById(bookId);
+        if (book.IsLoaned)
+        {
+            throw new NotImplementedException();
+        }
         _repository.Delete(book);
     }
 
@@ -68,4 +72,5 @@ public class BookService
     {
         return _repository.GetAll().First(b => b.Id == bookId);
     }
+
 }

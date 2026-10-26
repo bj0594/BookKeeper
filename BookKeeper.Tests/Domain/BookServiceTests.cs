@@ -7,6 +7,8 @@ public class BookServiceTests
 {
     private readonly BookService _service = new(new FakeBookRepository(), new FakeLoanRepository());
 
+
+
     [Fact]
     public void AddBook_ValidBook_AddsBookToLibrary()
     {
@@ -78,5 +80,16 @@ public class BookServiceTests
 
         // Assert
         Assert.Empty(_service.GetBooks());
+    }
+
+    [Fact]
+    public void DeleteBook_AlreadyLoaned_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var book = _service.AddBook("The Hobbit", "J.R.R. Tolkien");
+        _service.LoanBook(book.Id);
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => _service.DeleteBook(book.Id));
     }
 }
