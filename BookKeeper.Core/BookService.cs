@@ -64,6 +64,10 @@ public class BookService
         {
             throw new InvalidOperationException("Book is not loaned.");
         }
+        if (book.LoanedByUserId != userId)
+        {
+            throw new UnauthorizedAccessException("This book has already been loaned to another user. Return book to that user.");
+        }
         book.IsLoaned = false;
         _repository.Update(book);
     }
