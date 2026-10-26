@@ -52,26 +52,24 @@ A user registers with a role and logs in. A librarian sees all books and adds or
 ```
 BookService
 - IReadOnlyList<Book> GetBooks()                   -> all books
-- IReadOnlyList<Book> GetAvailableBooks()          -> books without an active loan
-- Book AddBook(string title, string author)        -> new book
-- void LoanBook(Guid id, Guid userId)              -> a new loan for the user
+- IReadOnlyList<Book> GetAvailableBooks()          -> books that are not loaned (LoanedByUserId is empty)
+- Book AddBook(string title, string author)        -> new book, not loaned
+- void LoanBook(Guid id, Guid userId)              -> book is loaned by the user (LoanedByUserId = userId)
                                                       already loaned: InvalidOperationException
-- IReadOnlyList<Loan> GetLoans(Guid userId)        -> the user's loans
-- void ReturnBook(Guid id, Guid userId)            -> the loan is ended, the book is available
+- IReadOnlyList<Book> GetLoans(Guid userId)        -> the books the user has loaned
+- void ReturnBook(Guid id, Guid userId)            -> book is available (LoanedByUserId is empty)
                                                       not loaned: InvalidOperationException
                                                       another user's loan: UnauthorizedAccessException
 - void DeleteBook(Guid id)                         -> book is removed
-                                                      book has active loan: InvalidOperationException
+                                                      book is loaned: InvalidOperationException
 
-Book: Id (Guid), Title (string), Author (string)
-Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald"
-Loan: Id (Guid), BookId (Guid), UserId (Guid)
-Example: 8b1d..., 3f2c..., 2a6f...
+Book: Id (Guid), Title (string), Author (string), LoanedByUserId (Guid?, empty when the book is available)
+Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald", 2a6f...
 ```
 
-Dependencies: IBookRepository and ILoanRepository
-- EfBookRepository and EfLoanRepository (BookKeeper.Infrastructure) store the books and loans in PostgreSQL. Used by the API.
-- FakeBookRepository and FakeLoanRepository (BookKeeper.Core) keep the books and loans in memory. Used by the domain tests and the API tests.
+Dependencies: IBookRepository
+- EfBookRepository (BookKeeper.Infrastructure) stores the books in PostgreSQL. Used by the API.
+- FakeBookRepository (BookKeeper.Core) keeps the books in memory. Used by the domain tests and the API tests.
 
 ## 5 Test list
 - [x] A new book can be added
@@ -116,9 +114,9 @@ Later questions:
 - Decision (assignment 3): Scalar stays as the API reference, also for the token (already used in the project)
 - Decision (assignment 3): Two types of users, librarian and library user (roles). Data that belongs to a user still has a user id
 - Decision (assignment 3): The role is chosen at registration, and only one librarian can be created (the system is a single library with one librarian)
-- Decision (assignment 3): A loan is its own type, to better simulate a real digital library
-- Decision (assignment 3): Book no longer has IsLoaned. A book is loaned when it has an active loan, so the information is only stored one place
-- Decision (assignment 3): BookService now depends on both IBookRepository and ILoanRepository, and still only talks to the repository interfaces
+- Decision (assignment 3): A book stores the id of the user who loaned it (LoanedByUserId). There is no separate loan type, because the flow only needs to know which user has each book
+- Decision (assignment 3): LoanedByUserId replaces IsLoaned. A book is loaned when LoanedByUserId has a value, so the information is only stored one place
+- Decision (assignment 3): BookService still only depends on IBookRepository
 
 - Limitation: An unknown id gives 409 Conflict on loan and return, and 500 on delete (no unknown id handling in the MVP)
 - Limitation: An empty title or author is accepted

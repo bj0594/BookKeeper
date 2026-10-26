@@ -6,12 +6,10 @@ namespace BookKeeper.Core;
 public class BookService
 {
     private readonly IBookRepository _repository;
-    private readonly ILoanRepository _loanRepository;
 
-    public BookService(IBookRepository repository, ILoanRepository loanRepository)
+    public BookService(IBookRepository repository)
     {
         _repository = repository;
-        _loanRepository = loanRepository;
     }
 
     // Creates a book with a new id, not loaned, and adds it to the library.
@@ -36,7 +34,7 @@ public class BookService
     // Returns only available/not loaned books. 
     public IReadOnlyList<Book> GetAvailableBooks()
     {
-        return _repository.GetAll().Where(b => !b.IsLoaned).ToList();
+        return [.. _repository.GetAll().Where(b => !b.IsLoaned)];
     }
 
     // Marks the book as loaned. Throws InvalidOperationException if it is already loaned or no book has the id.

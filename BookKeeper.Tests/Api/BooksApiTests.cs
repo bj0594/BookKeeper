@@ -15,12 +15,11 @@ public class BooksApiTests : IDisposable
     public BooksApiTests()
     {
         // xUnit creates this class once per test, so each test gets its own API with an empty book list.
-        _factory = new WebApplicationFactory<Program>().WithWebHostBuilder (builder =>
+        _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
             builder.ConfigureTestServices(services =>
             {
                 // Use the fake repository for testing, so we don't need a database.
                 services.AddSingleton<IBookRepository, FakeBookRepository>();
-                services.AddSingleton<ILoanRepository, FakeLoanRepository>();
             }));
         _client = _factory.CreateClient();
     }

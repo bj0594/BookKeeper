@@ -15,7 +15,6 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<BookKeeperDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IBookRepository, EfBookRepository>();
-builder.Services.AddSingleton<ILoanRepository, FakeLoanRepository>();
 builder.Services.AddScoped<BookService>();
 
 // GET /health is Healthy only when the API can reach the database.
