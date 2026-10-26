@@ -37,6 +37,12 @@ public class BookService
         return [.. _repository.GetAll().Where(b => !b.IsLoaned)];
     }
 
+    // Returns the books the user has loaned.
+    public IReadOnlyList<Book> GetLoans(Guid userId)
+    {
+        return _repository.GetLoanedBy(userId);
+    }
+
     // Marks the book as loaned by the user. Throws InvalidOperationException if it is already loaned or no book has the id.
     public void LoanBook(Guid bookId, Guid userId)
     {
@@ -77,9 +83,4 @@ public class BookService
     {
         return _repository.GetAll().First(b => b.Id == bookId);
     }
-
-    public IReadOnlyList<Book> GetLoans(Guid userId)
-    {
-        return _repository.GetLoanedBy(userId);
-    } 
 }

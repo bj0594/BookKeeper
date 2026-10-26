@@ -1,6 +1,5 @@
 ﻿using BookKeeper.Core;
 using BookKeeper.Core.Repository;
-using Microsoft.AspNetCore.Mvc.Controllers;
 
 namespace BookKeeper.Tests.Domain;
 
@@ -139,6 +138,5 @@ public class BookServiceTests
         // Assert
         var found = Assert.Single(result);
         Assert.Equal(ownBook.Id, found.Id);
-
     }    
 }
