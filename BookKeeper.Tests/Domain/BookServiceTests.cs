@@ -163,6 +163,5 @@ public class BookServiceTests
 
         // Assert
         Assert.Empty(_service.GetLoans(_userId));
-
     }
 }
