@@ -57,6 +57,7 @@ public class BookService
     }
 
     // Marks the book as not loaned. Throws InvalidOperationException if it is not loaned or no book has the id.
+    // and UnauthorizedAccessException if another user has loaned it.
     public void ReturnBook(Guid bookId, Guid userId)
     {
         var book = GetBookById(bookId);
@@ -66,7 +67,7 @@ public class BookService
         }
         if (book.LoanedByUserId != userId)
         {
-            throw new UnauthorizedAccessException("This book has already been loaned to another user. Return book to that user.");
+            throw new UnauthorizedAccessException("Book is loaned by another user.");
         }
         book.IsLoaned = false;
         _repository.Update(book);

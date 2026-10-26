@@ -149,5 +149,5 @@ public class BookServiceTests
 
         // Act + Assert
         Assert.Throws<UnauthorizedAccessException>(() => _service.ReturnBook(book.Id, _userId));
-    }    
+    }
 }
