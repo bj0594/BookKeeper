@@ -3,11 +3,12 @@ using BookKeeper.Core.Repository;
 using Scalar.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using BookKeeper.Infrastructure;
+using BookKeeper.Api.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
 
 // The API stores the books in PostgreSQL through EF Core. The connection string comes from Docker Compose
 // (ConnectionStrings__DefaultConnection) or from user-secrets when the API runs with dotnet run.
@@ -34,7 +35,7 @@ if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapScalarApiReference(options => options.AddPreferredSecuritySchemes("Bearer"));
 }
 
 app.UseHttpsRedirection();
