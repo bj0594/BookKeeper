@@ -15,13 +15,16 @@ public class AuthService
         _hasher = hasher;
     }
 
+    // Throws InvalidOperationException if the username is taken
     public User Register(string username, string password)
     {
         if (_users.GetByUsername(username) is not null)
         {
             throw new InvalidOperationException("Username is already taken.");
         }
-        var user = new User { Id = Guid.NewGuid(), Username = username, PasswordHash = _hasher.Hash(password)};
+        var user = new User { Id = Guid.NewGuid(), 
+                            Username = username, 
+                            PasswordHash = _hasher.Hash(password) };
         _users.Add(user);
         return user;
     }

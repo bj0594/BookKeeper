@@ -11,6 +11,8 @@ public class AuthApiTests : IDisposable
 {
     private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
+    private const string Username = "owner";
+    private const string Password = "Test-password-1";
 
     public AuthApiTests()
     {
@@ -29,7 +31,7 @@ public class AuthApiTests : IDisposable
     public async Task PostAuthRegister_NewUser_ReturnsCreated()
     {
         // Act
-        var response = await _client.PostAsJsonAsync("/auth/register", new { Username = "owner", Password = "Test-password-1" });
+        var response = await _client.PostAsJsonAsync("/auth/register", new { Username, Password });
 
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -39,7 +41,7 @@ public class AuthApiTests : IDisposable
     public async Task PostAuthRegister_TakenUsername_ReturnsConflict()
     {
         // Arrange
-        var credentials = new { Username = "owner", Password = "Test-password-1" };
+        var credentials = new { Username = Username, Password = Password };
         await _client.PostAsJsonAsync("/auth/register", credentials);
 
         // Act
@@ -52,15 +54,12 @@ public class AuthApiTests : IDisposable
     [Fact]
     public async Task PostAuthRegister_NewUser_StoresOnlyHash()
     {
-        // Arrange
-        var password = "Test-password-1";
-
         // Act
-        await _client.PostAsJsonAsync("/auth/register", new { Username = "owner", Password = password });
+        await _client.PostAsJsonAsync("/auth/register", new { Username, Password });
 
         // Assert
-        var user = _factory.Services.GetRequiredService<IUserRepository>().GetByUsername("owner");
-        Assert.NotEqual(password, user!.PasswordHash);
+        var user = _factory.Services.GetRequiredService<IUserRepository>().GetByUsername(Username);
+        Assert.NotEqual(Password, user!.PasswordHash);
         Assert.StartsWith("$2", user.PasswordHash);
     }
 }
