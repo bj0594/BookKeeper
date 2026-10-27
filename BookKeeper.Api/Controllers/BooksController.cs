@@ -33,7 +33,7 @@ public class BooksController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyList<Book>), StatusCodes.Status200OK)]
     public IActionResult GetBooks()
     {
-        return Ok(_bookService.GetBooks());
+        return Ok(User.IsInRole("Librarian") ? _bookService.GetBooks() : _bookService.GetAvailableBooks());
     }
 
     [Authorize(Roles = "LibraryUser")]
