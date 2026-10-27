@@ -262,4 +262,17 @@ public class BooksApiTests : IDisposable
         var found = Assert.Single(books!);
         Assert.Equal(ownBook.Id, found.Id);
     }
+
+    [Fact]
+    public async Task GetBookLoans_NotLibraryUser_ReturnsForbidden()
+{
+        // Arrange: a user with the other role
+        var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", "Librarian");
+
+        // Act
+        var response = await librarian.GetAsync("/books/loans");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
 }
