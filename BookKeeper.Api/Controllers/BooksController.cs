@@ -72,6 +72,7 @@ public class BooksController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Librarian")]
     [HttpDelete("{bookId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult DeleteBook([Description(BookIdDescription)] Guid bookId)

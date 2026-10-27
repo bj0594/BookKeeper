@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using BookKeeper.Core.Repository;
+using BookKeeper.Core;
 
 namespace BookKeeper.Tests.Api;
 
@@ -102,11 +103,12 @@ public class BooksApiTests : IDisposable
     public async Task DeleteBooks_ExistingBook_ReturnsNoContent()
     {
         // Arrange
+        var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", Roles.Librarian);
         var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
         var book = await CreateBookAsync();
 
         // Act
-        var response = await client.DeleteAsync($"/books/{book.Id}");
+        var response = await librarian.DeleteAsync($"/books/{book.Id}");
 
         // Assert
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
@@ -145,12 +147,13 @@ public class BooksApiTests : IDisposable
     public async Task DeleteBooks_LoanedBook_ReturnsConflict()
     {
         // Arrange
+        var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", Roles.Librarian);
         var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
         var book = await CreateBookAsync();
         await client.PatchAsync($"/books/{book.Id}/loan", null);
 
         // Act
-        var response = await client.DeleteAsync($"/books/{book.Id}");
+        var response = await librarian.DeleteAsync($"/books/{book.Id}");
 
         // Assert
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
