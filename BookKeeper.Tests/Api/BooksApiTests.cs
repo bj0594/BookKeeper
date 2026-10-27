@@ -275,4 +275,20 @@ public class BooksApiTests : IDisposable
         // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
+
+    [Fact]
+    public async Task ReturnBook_LoanedByOtherUser_ReturnsForbidden()
+    {
+        // Arrange
+        var book = await CreateBookAsync();
+        var owner = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
+        var other = await AuthHelper.CreateLoggedInClientAsync(_factory, "other");
+        await owner.PatchAsync($"/books/{book.Id}/loan", null);
+
+        // Act
+        var response = await other.PatchAsync($"/books/{book.Id}/return", null);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
 }
