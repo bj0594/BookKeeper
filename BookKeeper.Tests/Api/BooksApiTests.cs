@@ -241,4 +241,25 @@ public class BooksApiTests : IDisposable
         var books = await response.Content.ReadFromJsonAsync<List<BookResponse>>();
         Assert.Empty(books!);
     }
+
+    [Fact]
+    public async Task GetBooksLoans_TwoUsers_ReturnsOnlyOwn()
+    {
+        // Arrange: two users, and each loans their own book
+        var owner = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
+        var other = await AuthHelper.CreateLoggedInClientAsync(_factory, "other");
+        var ownBook = await CreateBookAsync();
+        var otherBook = await CreateBookAsync();
+        await owner.PatchAsync($"/books/{ownBook.Id}/loan", null);
+        await other.PatchAsync($"/books/{otherBook.Id}/loan", null);
+
+        // Act
+        var response = await owner.GetAsync("/books/loans");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var books = await response.Content.ReadFromJsonAsync<List<BookResponse>>();
+        var found = Assert.Single(books!);
+        Assert.Equal(ownBook.Id, found.Id);
+    }
 }
