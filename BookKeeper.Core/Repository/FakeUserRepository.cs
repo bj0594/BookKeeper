@@ -7,4 +7,5 @@ public class FakeUserRepository : IUserRepository
     public void Add(User user) => _users.Add(user);
 
     public User? GetByUsername(string username) => _users.FirstOrDefault(u => u.Username == username);
+    public bool HasRole(string role) => _users.Any(u => u.Role == role);
 }

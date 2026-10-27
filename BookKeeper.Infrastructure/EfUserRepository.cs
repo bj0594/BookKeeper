@@ -19,4 +19,5 @@ public class EfUserRepository : IUserRepository
     }
 
     public User? GetByUsername(string username) => _db.Users.FirstOrDefault(u => u.Username == username);
+    public bool HasRole(string role) => _db.Users.Any(u => u.Role == role);
 }

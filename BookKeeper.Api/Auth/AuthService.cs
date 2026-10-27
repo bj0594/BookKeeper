@@ -20,7 +20,7 @@ public class AuthService
         _config = config;
     }
 
-    // Throws InvalidOperationException if the username is taken, and ArgumentException if the role is unknown.
+    // Throws InvalidOperationException if the username is taken or the role rule is broken, and ArgumentException if the role is unknown.
     public User Register(string username, string password, string role)
     {
         if (_users.GetByUsername(username) is not null)
@@ -33,7 +33,12 @@ public class AuthService
             throw new ArgumentException($"Unknown role: {role}.");
         }
 
-        var user = new User { Id = Guid.NewGuid(), Username = username, PasswordHash = _hasher.Hash(password) };
+        if (role == "Librarian" && _users.HasRole("Librarian"))
+        {
+            throw new InvalidOperationException("A Librarian already exists.");
+        }
+
+        var user = new User { Id = Guid.NewGuid(), Username = username, PasswordHash = _hasher.Hash(password), Role = role };
         _users.Add(user);
         return user;
     }
