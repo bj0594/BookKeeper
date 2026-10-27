@@ -93,6 +93,7 @@ public class BooksController : ControllerBase
         }
     }
 
+    [Authorize(Roles = Roles.LibraryUser)]
     [HttpGet("loans")]
     public IActionResult GetLoans()
     {
