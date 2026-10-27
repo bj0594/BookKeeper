@@ -28,14 +28,14 @@ public class AuthService
             throw new InvalidOperationException("Username is already taken.");
         }
 
-        if (role != "Librarian" && role != "LibraryUser")
+        if (role is not (Roles.Librarian or Roles.LibraryUser))
         {
             throw new ArgumentException($"Unknown role: {role}.");
         }
 
-        if (role == "Librarian" && _users.HasRole("Librarian"))
+        if (role == Roles.Librarian && _users.HasRole(Roles.Librarian))
         {
-            throw new InvalidOperationException("A Librarian already exists.");
+            throw new InvalidOperationException("A librarian already exists.");
         }
 
         var user = new User { Id = Guid.NewGuid(), Username = username, PasswordHash = _hasher.Hash(password), Role = role };
