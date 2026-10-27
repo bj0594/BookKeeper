@@ -13,6 +13,7 @@ public class AuthApiTests : IDisposable
     private readonly HttpClient _client;
     private const string Username = "owner";
     private const string Password = "Test-password-1";
+    private const string DefaultRole = "LibraryUser";
 
     public AuthApiTests()
     {
@@ -32,7 +33,7 @@ public class AuthApiTests : IDisposable
     public async Task PostAuthRegister_NewUser_ReturnsCreated()
     {
         // Act
-        var response = await _client.PostAsJsonAsync("/auth/register", new { Username, Password });
+        var response = await _client.PostAsJsonAsync("/auth/register", new { Username, Password, Role = DefaultRole });
 
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -42,7 +43,7 @@ public class AuthApiTests : IDisposable
     public async Task PostAuthRegister_TakenUsername_ReturnsConflict()
     {
         // Arrange
-        var credentials = new { Username = Username, Password = Password };
+        var credentials = new { Username, Password, Role = DefaultRole };
         await _client.PostAsJsonAsync("/auth/register", credentials);
 
         // Act
@@ -56,7 +57,7 @@ public class AuthApiTests : IDisposable
     public async Task PostAuthRegister_NewUser_StoresOnlyHash()
     {
         // Act
-        await _client.PostAsJsonAsync("/auth/register", new { Username, Password });
+        await _client.PostAsJsonAsync("/auth/register", new { Username, Password, Role = DefaultRole });
 
         // Assert
         var user = _factory.Services.GetRequiredService<IUserRepository>().GetByUsername(Username);
@@ -68,7 +69,7 @@ public class AuthApiTests : IDisposable
     public async Task PostAuthLogin_ValidCredentials_ReturnsToken()
     {
         // Arrange
-        var credentials = new { Username, Password };
+        var credentials = new { Username, Password, Role = DefaultRole };
         await _client.PostAsJsonAsync("/auth/register", credentials);
 
         // Act
@@ -84,7 +85,7 @@ public class AuthApiTests : IDisposable
     public async Task PostAuthLogin_WrongPassword_ReturnsUnauthorized()
     {
         // Arrange
-        await _client.PostAsJsonAsync("/auth/register", new { Username, Password });
+        await _client.PostAsJsonAsync("/auth/register", new { Username, Password, Role = DefaultRole });
 
         // Act
         var response = await _client.PostAsJsonAsync("/auth/login", new { Username = "owner", Password = "Wrong-password-1" });
