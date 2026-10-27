@@ -29,9 +29,9 @@ public class BooksApiTests : IDisposable
 
     private record BookResponse(Guid Id, string Title, string Author, bool IsLoaned);
 
-    private async Task<BookResponse> CreateBookAsync()
+    private async Task<BookResponse> CreateBookAsync(HttpClient client)
     {
-        var response = await _client.PostAsJsonAsync("/books", new { Title = "Test Book", Author = "Test Author" });
+        var response = await client.PostAsJsonAsync("/books", new { Title = "Test Book", Author = "Test Author" });
         return (await response.Content.ReadFromJsonAsync<BookResponse>())!;
     }
 
@@ -39,10 +39,11 @@ public class BooksApiTests : IDisposable
     public async Task PostBooks_ValidBook_ReturnsCreatedBook()
     {
         // Arrange
+        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
         var request = new { Title = "Test Book", Author = "Test Author" };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/books", request);
+        var response = await client.PostAsJsonAsync("/books", request);
 
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -55,10 +56,11 @@ public class BooksApiTests : IDisposable
     public async Task GetBooks_AfterBookAdded_ReturnsOkWithList()
     {
         // Arrange
-        await CreateBookAsync();
+        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
+        await CreateBookAsync(client);
 
         // Act
-        var response = await _client.GetAsync("/books");
+        var response = await client.GetAsync("/books");
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -70,10 +72,11 @@ public class BooksApiTests : IDisposable
     public async Task PatchBooksLoan_ExistingBook_ReturnsNoContent()
     {
         // Arrange
-        var book = await CreateBookAsync();
+        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
+        var book = await CreateBookAsync(client);
 
         // Act
-        var response = await _client.PatchAsync($"/books/{book.Id}/loan", null);
+        var response = await client.PatchAsync($"/books/{book.Id}/loan", null);
 
         // Assert
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
@@ -83,11 +86,12 @@ public class BooksApiTests : IDisposable
     public async Task PatchBooksReturn_LoanedBook_ReturnsNoContent()
     {
         // Arrange
-        var book = await CreateBookAsync();
-        await _client.PatchAsync($"/books/{book.Id}/loan", null);
+        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
+        var book = await CreateBookAsync(client);
+        await client.PatchAsync($"/books/{book.Id}/loan", null);
 
         // Act
-        var response = await _client.PatchAsync($"/books/{book.Id}/return", null);
+        var response = await client.PatchAsync($"/books/{book.Id}/return", null);
 
         // Assert
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
@@ -97,10 +101,11 @@ public class BooksApiTests : IDisposable
     public async Task DeleteBooks_ExistingBook_ReturnsNoContent()
     {
         // Arrange
-        var book = await CreateBookAsync();
+        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
+        var book = await CreateBookAsync(client);
 
         // Act
-        var response = await _client.DeleteAsync($"/books/{book.Id}");
+        var response = await client.DeleteAsync($"/books/{book.Id}");
 
         // Assert
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
@@ -110,11 +115,12 @@ public class BooksApiTests : IDisposable
     public async Task PatchBooksLoan_AlreadyLoaned_ReturnsConflict()
     {
         // Arrange: ensures the book is already loaned before testing the conflict scenario
-        var book = await CreateBookAsync();
-        await _client.PatchAsync($"/books/{book.Id}/loan", null);
+        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
+        var book = await CreateBookAsync(client);
+        await client.PatchAsync($"/books/{book.Id}/loan", null);
 
         // Act
-        var response = await _client.PatchAsync($"/books/{book.Id}/loan", null);
+        var response = await client.PatchAsync($"/books/{book.Id}/loan", null);
 
         // Assert
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
@@ -124,10 +130,11 @@ public class BooksApiTests : IDisposable
     public async Task PatchBooksReturn_NotLoaned_ReturnsConflict()
     {
         // Arrange: ensures the book is not loaned before testing the conflict scenario
-        var book = await CreateBookAsync();
+        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
+        var book = await CreateBookAsync(client);
 
         // Act
-        var response = await _client.PatchAsync($"/books/{book.Id}/return", null);
+        var response = await client.PatchAsync($"/books/{book.Id}/return", null);
 
         // Assert
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
@@ -137,11 +144,12 @@ public class BooksApiTests : IDisposable
     public async Task DeleteBooks_LoanedBook_ReturnsConflict()
     {
         // Arrange
-        var book = await CreateBookAsync();
-        await _client.PatchAsync($"/books/{book!.Id}/loan", null);
+        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
+        var book = await CreateBookAsync(client);
+        await client.PatchAsync($"/books/{book!.Id}/loan", null);
 
         // Act
-        var response = await _client.DeleteAsync($"/books/{book!.Id}");
+        var response = await client.DeleteAsync($"/books/{book!.Id}");
 
         // Assert
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);

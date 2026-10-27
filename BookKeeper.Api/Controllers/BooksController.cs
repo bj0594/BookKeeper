@@ -1,10 +1,12 @@
 using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
 using BookKeeper.Core;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookKeeper.Api.Controllers;
 
 // Connects the /books endpoints to BookService. The contract is in Documentation/api.md.
+[Authorize]
 [ApiController]
 [Route("books")]
 public class BooksController : ControllerBase
