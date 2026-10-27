@@ -26,6 +26,7 @@ public class AuthApiTests : IDisposable
     }
 
     public void Dispose() => _factory.Dispose();
+    private record LoginResponse(string Token);
 
     [Fact]
     public async Task PostAuthRegister_NewUser_ReturnsCreated()
@@ -61,5 +62,21 @@ public class AuthApiTests : IDisposable
         var user = _factory.Services.GetRequiredService<IUserRepository>().GetByUsername(Username);
         Assert.NotEqual(Password, user!.PasswordHash);
         Assert.StartsWith("$2", user.PasswordHash);
+    }
+
+    [Fact]
+    public async Task PostAuthLogin_ValidCredentials_ReturnsToken()
+    {
+        // Arrange
+        var credentials = new { Username = "owner", Password = "Test-password-1" };
+        await _client.PostAsJsonAsync("/auth/register", credentials);
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/auth/login", credentials);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<LoginResponse>();
+        Assert.False(string.IsNullOrEmpty(body!.Token));
     }
 }
