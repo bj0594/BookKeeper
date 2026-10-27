@@ -55,6 +55,7 @@ public class BooksController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "LibraryUser")]
     [HttpPatch("{bookId:guid}/return")]
     [EndpointDescription("Send it for a book that is not loaned to get 409 Conflict (book is not loaned).")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
