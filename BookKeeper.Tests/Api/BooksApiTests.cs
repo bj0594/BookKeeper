@@ -198,13 +198,29 @@ public class BooksApiTests : IDisposable
 
     [Fact]
     public async Task PatchBooksLoan_NotLibraryUser_ReturnsForbidden()
-{
+    {
         // Arrange: an object that exists, and a user with the other role
         var book = await CreateBookAsync();
         var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", "Librarian");
 
         // Act
         var response = await librarian.PatchAsync($"/books/{book.Id}/loan", null);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task PatchBooksReturn_NotLibraryUser_ReturnsForbidden()
+    {
+        // Arrange: an object that exists, and a user with the other role
+        var book = await CreateBookAsync();
+        var user = await AuthHelper.CreateLoggedInClientAsync(_factory, "user");
+        await user.PatchAsync($"/books/{book.Id}/loan", null);
+        var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", "Librarian");
+
+        // Act
+        var response = await librarian.PatchAsync($"/books/{book.Id}/return", null);
 
         // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
