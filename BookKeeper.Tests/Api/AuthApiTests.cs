@@ -119,5 +119,18 @@ public class AuthApiTests : IDisposable
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Fact]
+    public async Task PostAuthRegister_SecondLibrarian_ReturnsConflict()
+{
+        // Arrange
+        await _client.PostAsJsonAsync("/auth/register", new { Username = "first", Password = "Test-password-1", Role = "Librarian" });
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/auth/register", new { Username = "second", Password = "Test-password-2", Role = "Librarian" });
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
+
     private record ClaimResponse(string Type, string Value);
 }
