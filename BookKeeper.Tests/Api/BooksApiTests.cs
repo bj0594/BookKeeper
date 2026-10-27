@@ -146,10 +146,10 @@ public class BooksApiTests : IDisposable
         // Arrange
         var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
         var book = await CreateBookAsync(client);
-        await client.PatchAsync($"/books/{book!.Id}/loan", null);
+        await client.PatchAsync($"/books/{book.Id}/loan", null);
 
         // Act
-        var response = await client.DeleteAsync($"/books/{book!.Id}");
+        var response = await client.DeleteAsync($"/books/{book.Id}");
 
         // Assert
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
@@ -157,9 +157,9 @@ public class BooksApiTests : IDisposable
 
     [Fact]
     public async Task GetBooks_WithoutToken_ReturnsUnauthorized()
-{
+    {
         // Act
-        var response = await _client.GetAsync("books");
+        var response = await _client.GetAsync("/books");
 
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
