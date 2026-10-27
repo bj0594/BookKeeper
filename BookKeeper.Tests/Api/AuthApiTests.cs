@@ -84,7 +84,7 @@ public class AuthApiTests : IDisposable
     public async Task PostAuthLogin_WrongPassword_ReturnsUnauthorized()
     {
         // Arrange
-        await _client.PostAsJsonAsync("/auth/register", new { Username = "owner", Password = "Test-password-1" });
+        await _client.PostAsJsonAsync("/auth/register", new { Username, Password });
 
         // Act
         var response = await _client.PostAsJsonAsync("/auth/login", new { Username = "owner", Password = "Wrong-password-1" });
