@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
 using BookKeeper.Core;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace BookKeeper.Api.Controllers;
 
@@ -13,6 +14,8 @@ public class BooksController : ControllerBase
 {
     private const string BookIdDescription = "Copy the id from the response to POST /books";
     private readonly BookService _bookService;
+    // The logged-in user's id, from the sub claim in the token.
+    private Guid CurrentUserId => Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
     public BooksController(BookService bookService)
     {
@@ -45,7 +48,7 @@ public class BooksController : ControllerBase
     {
         try
         {
-            _bookService.LoanBook(bookId, Guid.Empty); // replaced by the logged-in user's id in later commit
+            _bookService.LoanBook(bookId, CurrentUserId); // replaced by the logged-in user's id in later commit
             return NoContent();
         }
         catch (InvalidOperationException ex)
@@ -64,7 +67,7 @@ public class BooksController : ControllerBase
     {
         try
         {
-            _bookService.ReturnBook(bookId, Guid.Empty);
+            _bookService.ReturnBook(bookId, CurrentUserId);
             return NoContent();
         }
         catch (InvalidOperationException ex)
@@ -88,5 +91,11 @@ public class BooksController : ControllerBase
         {
             return Conflict(ex.Message);
         }
+    }
+
+    [HttpGet("loans")]
+    public IActionResult GetLoans()
+    {
+        return Ok(_bookService.GetLoans(CurrentUserId));
     }
 }
