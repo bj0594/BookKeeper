@@ -65,7 +65,8 @@ public class AuthService
             Subject = new ClaimsIdentity(
             [
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.UniqueName, user.Username)
+            new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
+            new Claim("role", user.Role)
         ]),
             Issuer = _config["Jwt:Issuer"],
             Audience = _config["Jwt:Audience"],

@@ -29,17 +29,18 @@ public class BooksApiTests : IDisposable
 
     private record BookResponse(Guid Id, string Title, string Author, bool IsLoaned);
 
-    private async Task<BookResponse> CreateBookAsync(HttpClient client)
+    private async Task<BookResponse> CreateBookAsync()
     {
-        var response = await client.PostAsJsonAsync("/books", new { Title = "Test Book", Author = "Test Author" });
-        return (await response.Content.ReadFromJsonAsync<BookResponse>())!;
+        var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", "Librarian");
+        var created = await librarian.PostAsJsonAsync("/books", new { Title = "Test Book", Author = "Test Author" });
+        return (await created.Content.ReadFromJsonAsync<BookResponse>())!;
     }
 
     [Fact]
     public async Task PostBooks_ValidBook_ReturnsCreatedBook()
     {
         // Arrange
-        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
+        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", "Librarian");
         var request = new { Title = "Test Book", Author = "Test Author" };
 
         // Act
@@ -57,7 +58,7 @@ public class BooksApiTests : IDisposable
     {
         // Arrange
         var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
-        await CreateBookAsync(client);
+        await CreateBookAsync();
 
         // Act
         var response = await client.GetAsync("/books");
@@ -73,7 +74,7 @@ public class BooksApiTests : IDisposable
     {
         // Arrange
         var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
-        var book = await CreateBookAsync(client);
+        var book = await CreateBookAsync();
 
         // Act
         var response = await client.PatchAsync($"/books/{book.Id}/loan", null);
@@ -87,7 +88,7 @@ public class BooksApiTests : IDisposable
     {
         // Arrange
         var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
-        var book = await CreateBookAsync(client);
+        var book = await CreateBookAsync();
         await client.PatchAsync($"/books/{book.Id}/loan", null);
 
         // Act
@@ -102,7 +103,7 @@ public class BooksApiTests : IDisposable
     {
         // Arrange
         var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
-        var book = await CreateBookAsync(client);
+        var book = await CreateBookAsync();
 
         // Act
         var response = await client.DeleteAsync($"/books/{book.Id}");
@@ -116,7 +117,7 @@ public class BooksApiTests : IDisposable
     {
         // Arrange: ensures the book is already loaned before testing the conflict scenario
         var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
-        var book = await CreateBookAsync(client);
+        var book = await CreateBookAsync();
         await client.PatchAsync($"/books/{book.Id}/loan", null);
 
         // Act
@@ -131,7 +132,7 @@ public class BooksApiTests : IDisposable
     {
         // Arrange: ensures the book is not loaned before testing the conflict scenario
         var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
-        var book = await CreateBookAsync(client);
+        var book = await CreateBookAsync();
 
         // Act
         var response = await client.PatchAsync($"/books/{book.Id}/return", null);
@@ -145,7 +146,7 @@ public class BooksApiTests : IDisposable
     {
         // Arrange
         var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
-        var book = await CreateBookAsync(client);
+        var book = await CreateBookAsync();
         await client.PatchAsync($"/books/{book.Id}/loan", null);
 
         // Act
@@ -173,7 +174,7 @@ public class BooksApiTests : IDisposable
 
         // Act
         var response = await user.PostAsJsonAsync("/books", new { Title = "Dune", Author = "Frank Herbert" });
-        
+
         // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }

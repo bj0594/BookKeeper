@@ -19,6 +19,7 @@ public class BooksController : ControllerBase
         _bookService = bookService;
     }
 
+    [Authorize(Roles = "Librarian")]
     [HttpPost]
     [EndpointDescription("Fill in title and author in the request body. The id in the response is used by loan, return and delete.")]
     [ProducesResponseType(typeof(Book), StatusCodes.Status201Created)]
