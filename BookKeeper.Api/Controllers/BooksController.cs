@@ -36,6 +36,7 @@ public class BooksController : ControllerBase
         return Ok(_bookService.GetBooks());
     }
 
+    [Authorize(Roles = "LibraryUser")]
     [HttpPatch("{bookId:guid}/loan")]
     [EndpointDescription("Send it twice for the same book to get 409 Conflict (book is already loaned).")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
