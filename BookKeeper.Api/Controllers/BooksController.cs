@@ -73,7 +73,14 @@ public class BooksController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public IActionResult DeleteBook([Description(BookIdDescription)] Guid bookId)
     {
-        _bookService.DeleteBook(bookId);
-        return NoContent();
+        try
+        {
+            _bookService.DeleteBook(bookId);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
     }
 }
