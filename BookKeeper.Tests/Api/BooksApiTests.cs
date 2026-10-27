@@ -164,4 +164,17 @@ public class BooksApiTests : IDisposable
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
+
+    [Fact]
+    public async Task PostBooks_NotLibrarian_ReturnsForbidden()
+{
+        // Arrange
+        var user = await AuthHelper.CreateLoggedInClientAsync(_factory, "user");
+
+        // Act
+        var response = await user.PostAsJsonAsync("/books", new { Title = "Dune", Author = "Frank Herbert" });
+        
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
 }
