@@ -75,6 +75,10 @@ public class BooksController : ControllerBase
             // A book that is not loaned gives 409. An unknown id also ends up here, because it throws the same exception type.
             return Conflict(ex.Message);
         }
+        catch (UnauthorizedAccessException) 
+        { 
+            return Forbid(); 
+        }
     }
 
     [Authorize(Roles = "Librarian")]
