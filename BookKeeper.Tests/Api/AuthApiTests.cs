@@ -68,7 +68,7 @@ public class AuthApiTests : IDisposable
     public async Task PostAuthLogin_ValidCredentials_ReturnsToken()
     {
         // Arrange
-        var credentials = new { Username = "owner", Password = "Test-password-1" };
+        var credentials = new { Username, Password };
         await _client.PostAsJsonAsync("/auth/register", credentials);
 
         // Act

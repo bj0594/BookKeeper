@@ -48,11 +48,11 @@ public class AuthService
 
         var descriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new[]
-            {
+            Subject = new ClaimsIdentity(
+            [
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.UniqueName, user.Username)
-        }),
+        ]),
             Issuer = _config["Jwt:Issuer"],
             Audience = _config["Jwt:Audience"],
             Expires = DateTime.UtcNow.AddHours(1),
