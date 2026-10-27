@@ -131,4 +131,18 @@ public class BooksApiTests : IDisposable
         // Assert
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+
+    [Fact]
+    public async Task DeleteBooks_LoanedBook_ReturnsConflict()
+    {
+        // Arrange
+        var book = await CreateBookAsync();
+        await _client.PatchAsync($"/books/{book!.Id}/loan", null);
+
+        // Act
+        var response = await _client.DeleteAsync($"/books/{book!.Id}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+    }
 }
