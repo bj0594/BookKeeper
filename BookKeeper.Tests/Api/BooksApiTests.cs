@@ -146,4 +146,14 @@ public class BooksApiTests : IDisposable
         // Assert
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
+
+    [Fact]
+    public async Task GetBooks_WithoutToken_ReturnsUnauthorized()
+{
+        // Act
+        var response = await _client.GetAsync("books");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
 }
