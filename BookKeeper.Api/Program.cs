@@ -4,6 +4,9 @@ using Scalar.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using BookKeeper.Infrastructure;
 using BookKeeper.Api.Auth;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,11 +24,29 @@ builder.Services.AddScoped<IUserRepository, EfUserRepository>();
 builder.Services.AddSingleton<PasswordHasher>();
 builder.Services.AddScoped<AuthService>();
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+            ValidateLifetime = true
+        };
+    });
+builder.Services.AddAuthorization();
+
 // GET /health is Healthy only when the API can reach the database.
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<BookKeeperDbContext>();
 
 var app = builder.Build();
+
+app.UseAuthentication();
 
 // Creates or updates the tables when the API starts. Only Docker Compose turns this on (Database__MigrateOnStartup),
 // so the tests and dotnet run never touch the database schema.
