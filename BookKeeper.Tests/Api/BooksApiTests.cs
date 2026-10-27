@@ -225,4 +225,20 @@ public class BooksApiTests : IDisposable
         // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
+
+    [Fact]
+    public async Task GetBooks_LibraryUser_DoesNotShowLoanedBooks()
+    {
+        // Arrange: a <thing> in the state the role should not see
+        var user = await AuthHelper.CreateLoggedInClientAsync(_factory, "user");
+        var book = await CreateBookAsync();
+        await user.PatchAsync($"/books/{book.Id}/loan", null);
+
+        // Act
+        var response = await user.GetAsync("/books");
+
+        // Assert
+        var books = await response.Content.ReadFromJsonAsync<List<BookResponse>>();
+        Assert.Empty(books!);
+    }
 }
