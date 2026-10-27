@@ -88,7 +88,7 @@ public class AuthApiTests : IDisposable
         await _client.PostAsJsonAsync("/auth/register", new { Username, Password, Role = DefaultRole });
 
         // Act
-        var response = await _client.PostAsJsonAsync("/auth/login", new { Username = "owner", Password = "Wrong-password-1" });
+        var response = await _client.PostAsJsonAsync("/auth/login", new { Username = "Username", Password = "Wrong-password" });
 
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
@@ -98,7 +98,7 @@ public class AuthApiTests : IDisposable
     public async Task GetAuthMe_WithToken_ReturnsUsername()
     {
         // Arrange
-        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
+        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, Username);
 
         // Act
         var response = await client.GetAsync("/auth/me");
@@ -113,7 +113,7 @@ public class AuthApiTests : IDisposable
     public async Task PostAuthRegister_InvalidRole_ReturnsBadRequest()
     {
         // Act
-        var response = await _client.PostAsJsonAsync("/auth/register", new { Username = "owner", Password = "Test-password-1", Role = "<invalidRole>" });
+        var response = await _client.PostAsJsonAsync("/auth/register", new { Username = "owner", Password = "Test-password-1", Role = "Admin" });
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
