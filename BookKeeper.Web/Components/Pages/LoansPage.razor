@@ -7,6 +7,11 @@
 
 <h1>My loans</h1>
 
+@if (_error is not null)
+{
+    <p class="error">@_error</p>
+}
+
 @if (_items is null)
 {
     <p>Loading…</p>
@@ -23,6 +28,7 @@ else
 
 @code {
     private List<BookDto>? _items;
+    private string? _error;
 
     protected override async Task OnInitializedAsync()
 {
@@ -37,7 +43,15 @@ else
 
     private async Task Return(Guid id)
     {
-        await Client.ReturnBookAsync(id);
-        _items = await Client.GetLoansAsync();
+        try
+        {
+            _error = null;
+            await Client.ReturnBookAsync(id);
+            _items = await Client.GetLoansAsync();
+        }
+        catch (HttpRequestException ex)
+        {
+            _error = ex.Message;
+        }
     }
 }
