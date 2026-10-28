@@ -8,4 +8,9 @@ public class FakeBooksClient : IBooksClient
     public List<BookDto> Items { get; } = [];
 
     public Task<List<BookDto>> GetBooksAsync() => Task.FromResult(Items);
+    public Task AddBookAsync(string title, string author)
+    {
+        Items.Add(new BookDto(Guid.NewGuid(), title, author, false, null));
+        return Task.CompletedTask;
+    }
 }

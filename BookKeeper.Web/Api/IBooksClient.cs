@@ -4,4 +4,5 @@ namespace BookKeeper.Web.Api;
 public interface IBooksClient
 {
     Task<List<BookDto>> GetBooksAsync();
+    Task AddBookAsync(string title, string author);
 }

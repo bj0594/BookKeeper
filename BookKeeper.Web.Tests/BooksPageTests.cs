@@ -28,4 +28,19 @@ public class BooksPageTests : BunitContext
         // Assert
         Assert.Equal(2, page.FindAll("li").Count);
     }
+
+    [Fact]
+    public void BooksPage_AddBook_SendsItToTheApi()
+    {
+        // Arrange
+        var page = Render<BooksPage>();
+
+        // Act
+        page.Find("#title").Change("Dune");
+        page.Find("#author").Change("Frank Herbert");
+        page.Find("form").Submit();
+
+        // Assert
+        page.WaitForAssertion(() => Assert.Single(_client.Items));
+    }
 }

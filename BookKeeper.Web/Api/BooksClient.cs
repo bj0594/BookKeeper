@@ -16,4 +16,6 @@ public class BooksClient : IBooksClient
     {
         return await _http.GetFromJsonAsync<List<BookDto>>("books") ?? [];
     }
+
+    public Task AddBookAsync(string title, string author) => throw new NotImplementedException();
 }
