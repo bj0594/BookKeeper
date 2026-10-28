@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
+using BookKeeper.Api.Dtos;
 using BookKeeper.Core;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
@@ -22,7 +23,7 @@ public class BooksController : ControllerBase
         _bookService = bookService;
     }
 
-    [Authorize(Roles = "Librarian")]
+    [Authorize(Roles = Roles.Librarian)]
     [HttpPost]
     [EndpointDescription("Fill in title and author in the request body. The id in the response is used by loan, return and delete.")]
     [ProducesResponseType(typeof(Book), StatusCodes.Status201Created)]
@@ -36,10 +37,10 @@ public class BooksController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyList<Book>), StatusCodes.Status200OK)]
     public IActionResult GetBooks()
     {
-        return Ok(User.IsInRole("Librarian") ? _bookService.GetBooks() : _bookService.GetAvailableBooks());
+        return Ok(User.IsInRole(Roles.Librarian) ? _bookService.GetBooks() : _bookService.GetAvailableBooks());
     }
 
-    [Authorize(Roles = "LibraryUser")]
+    [Authorize(Roles = Roles.LibraryUser)]
     [HttpPatch("{bookId:guid}/loan")]
     [EndpointDescription("Send it twice for the same book to get 409 Conflict (book is already loaned).")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -48,7 +49,7 @@ public class BooksController : ControllerBase
     {
         try
         {
-            _bookService.LoanBook(bookId, CurrentUserId); // replaced by the logged-in user's id in later commit
+            _bookService.LoanBook(bookId, CurrentUserId);
             return NoContent();
         }
         catch (InvalidOperationException ex)
@@ -58,7 +59,7 @@ public class BooksController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "LibraryUser")]
+    [Authorize(Roles = Roles.LibraryUser)]
     [HttpPatch("{bookId:guid}/return")]
     [EndpointDescription("Send it for a book that is not loaned to get 409 Conflict (book is not loaned).")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -75,15 +76,17 @@ public class BooksController : ControllerBase
             // A book that is not loaned gives 409. An unknown id also ends up here, because it throws the same exception type.
             return Conflict(ex.Message);
         }
-        catch (UnauthorizedAccessException) 
-        { 
-            return Forbid(); 
+        catch (UnauthorizedAccessException)
+        {
+            // The book is loaned by another user.
+            return Forbid();
         }
     }
 
-    [Authorize(Roles = "Librarian")]
+    [Authorize(Roles = Roles.Librarian)]
     [HttpDelete("{bookId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
     public IActionResult DeleteBook([Description(BookIdDescription)] Guid bookId)
     {
         try
@@ -99,6 +102,7 @@ public class BooksController : ControllerBase
 
     [Authorize(Roles = Roles.LibraryUser)]
     [HttpGet("loans")]
+    [ProducesResponseType(typeof(IReadOnlyList<Book>), StatusCodes.Status200OK)]
     public IActionResult GetLoans()
     {
         return Ok(_bookService.GetLoans(CurrentUserId));

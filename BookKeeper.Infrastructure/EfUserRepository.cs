@@ -3,6 +3,7 @@ using BookKeeper.Core.Repository;
 
 namespace BookKeeper.Infrastructure;
 
+// Stores the users in PostgreSQL through EF Core. Used by the API, while the tests use FakeUserRepository.
 public class EfUserRepository : IUserRepository
 {
     private readonly BookKeeperDbContext _db;
@@ -19,5 +20,6 @@ public class EfUserRepository : IUserRepository
     }
 
     public User? GetByUsername(string username) => _db.Users.FirstOrDefault(u => u.Username == username);
+
     public bool HasRole(string role) => _db.Users.Any(u => u.Role == role);
 }

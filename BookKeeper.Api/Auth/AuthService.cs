@@ -13,6 +13,7 @@ public class AuthService
     private readonly IUserRepository _users;
     private readonly PasswordHasher _hasher;
     private readonly IConfiguration _config;
+
     public AuthService(IUserRepository users, PasswordHasher hasher, IConfiguration config)
     {
         _users = users;
@@ -64,10 +65,10 @@ public class AuthService
         {
             Subject = new ClaimsIdentity(
             [
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
-            new Claim("role", user.Role)
-        ]),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
+                new Claim("role", user.Role)
+            ]),
             Issuer = _config["Jwt:Issuer"],
             Audience = _config["Jwt:Audience"],
             Expires = DateTime.UtcNow.AddHours(1),

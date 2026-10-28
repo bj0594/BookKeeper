@@ -3,7 +3,7 @@ using Microsoft.OpenApi;
 
 namespace BookKeeper.Api.Auth;
 
-// Tells Swagger that the API expects a JWT in the Authorization header, so it shows the Authorize button.
+// Tells the OpenAPI document that the API expects a JWT in the Authorization header, so Scalar lets you paste a token under Authentication.
 internal sealed class BearerSecuritySchemeTransformer : IOpenApiDocumentTransformer
 {
     public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)

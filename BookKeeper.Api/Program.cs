@@ -46,8 +46,6 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
-app.UseAuthentication();
-
 // Creates or updates the tables when the API starts. Only Docker Compose turns this on (Database__MigrateOnStartup),
 // so the tests and dotnet run never touch the database schema.
 if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
@@ -64,6 +62,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

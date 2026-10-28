@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using BookKeeper.Api.Auth;
+using BookKeeper.Api.Dtos;
 using Microsoft.AspNetCore.Authorization;
 
 namespace BookKeeper.Api.Controllers;
 
+// Connects the /auth endpoints to AuthService: register, log in, and see the claims in your own token.
 [ApiController]
 [Route("auth")]
 public class AuthController : ControllerBase
