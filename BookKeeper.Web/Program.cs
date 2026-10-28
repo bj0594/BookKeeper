@@ -11,6 +11,11 @@ builder.Services.AddRazorComponents()
 builder.Services.AddHttpClient<IBooksClient, BooksClient>(client =>
     client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!));
 
+// One TokenStore per browser tab. AuthClient logs in and fills it.
+builder.Services.AddScoped<TokenStore>();
+builder.Services.AddHttpClient<IAuthClient, AuthClient>(client =>
+    client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
