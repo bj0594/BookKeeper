@@ -13,4 +13,12 @@ public class FakeBooksClient : IBooksClient
         Items.Add(new BookDto(Guid.NewGuid(), title, author, false, null));
         return Task.CompletedTask;
     }
+
+    public List<Guid> LoanedIds { get; } = [];
+
+    public Task LoanBookAsync(Guid id)
+    {
+        LoanedIds.Add(id);
+        return Task.CompletedTask;
+    }
 }

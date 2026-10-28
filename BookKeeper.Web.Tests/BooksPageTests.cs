@@ -43,4 +43,19 @@ public class BooksPageTests : BunitContext
         // Assert
         page.WaitForAssertion(() => Assert.Single(_client.Items));
     }
+
+    [Fact]
+    public void BooksPage_ClickLoan_SendsItToTheApi()
+    {
+        // Arrange
+        var book = new BookDto(Guid.NewGuid(), "Dune", "Frank Herbert", false, null);
+        _client.Items.Add(book);
+        var page = Render<BooksPage>();
+
+        // Act
+        page.Find("li button.loan").Click();
+
+        // Assert
+        page.WaitForAssertion(() => Assert.Contains(book.Id, _client.LoanedIds));
+    }
 }

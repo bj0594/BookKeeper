@@ -5,4 +5,5 @@ public interface IBooksClient
 {
     Task<List<BookDto>> GetBooksAsync();
     Task AddBookAsync(string title, string author);
+    Task LoanBookAsync(Guid id);
 }

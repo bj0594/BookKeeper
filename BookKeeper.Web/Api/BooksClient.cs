@@ -22,4 +22,6 @@ public class BooksClient : IBooksClient
         var response = await _http.PostAsJsonAsync("books", new { title, author });
         response.EnsureSuccessStatusCode();
     }
+
+    public Task LoanBookAsync(Guid id) => throw new NotImplementedException();
 }
