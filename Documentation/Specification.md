@@ -12,6 +12,8 @@ Delivered as a GitHub repo with tests and a README.
 Main flow (assignment 3):
 A user creates an account, chooses to be a librarian or library user, and logs in.
 
+Frontend: the main flow can be done in the browser (Books, Loans)
+
 If librarian:
 Adds a book, sees it in the list, deletes it.
 
@@ -115,6 +117,15 @@ Manual checks (assignment 3, against the API in Docker Compose with BookKeeper.A
 - [x] The whole flow works against PostgreSQL: register, log in, send the token, add a book, loan it, see it in my loans, return it
 - [x] A second library user does not see the loan, and gets 403 when returning it
 - [x] In pgAdmin: Users has only the hash in PasswordHash. While the book is loaned, LoanedByUserId in Books is the user's id. After the return it is NULL
+
+Frontend:
+- [ ] Books page shows the list from the API
+- [ ] Books page sends a new book to the API
+- [ ] Books page sends a loan for one book
+- [ ] Books page sends a delete for one book
+- [ ] Books page shows the error message from the API
+- [ ] Loans page shows the user's own loans
+- [ ] Loans page sends a return for one book
 
 Later questions:
 - [x] Can a user loan several books?
