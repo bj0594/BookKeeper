@@ -1,33 +1,30 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using BookKeeper.Core;
 using BookKeeper.Core.Repository;
 
 namespace BookKeeper.Tests.Api;
 
+// Contract tests for /auth in Documentation/api.md.
 public class AuthApiTests : IDisposable
 {
     private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
     private const string Username = "owner";
     private const string Password = "Test-password-1";
-    private const string DefaultRole = "LibraryUser";
+    private const string DefaultRole = Roles.LibraryUser;
 
     public AuthApiTests()
     {
-        _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services =>
-            {
-                services.AddSingleton<IBookRepository, FakeBookRepository>();
-                services.AddSingleton<IUserRepository, FakeUserRepository>();
-            }));
+        _factory = new BookKeeperFactory();
         _client = _factory.CreateClient();
     }
 
     public void Dispose() => _factory.Dispose();
     private record LoginResponse(string Token);
+    private record ClaimResponse(string Type, string Value);
 
     [Fact]
     public async Task PostAuthRegister_NewUser_ReturnsCreated()
@@ -88,7 +85,7 @@ public class AuthApiTests : IDisposable
         await _client.PostAsJsonAsync("/auth/register", new { Username, Password, Role = DefaultRole });
 
         // Act
-        var response = await _client.PostAsJsonAsync("/auth/login", new { Username = "Username", Password = "Wrong-password" });
+        var response = await _client.PostAsJsonAsync("/auth/login", new { Username, Password = "Wrong-password" });
 
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
@@ -106,14 +103,14 @@ public class AuthApiTests : IDisposable
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var claims = await response.Content.ReadFromJsonAsync<List<ClaimResponse>>();
-        Assert.Contains(claims!, c => c.Value == "owner");
+        Assert.Contains(claims!, c => c.Value == Username);
     }
 
     [Fact]
     public async Task PostAuthRegister_InvalidRole_ReturnsBadRequest()
     {
         // Act
-        var response = await _client.PostAsJsonAsync("/auth/register", new { Username = "owner", Password = "Test-password-1", Role = "Admin" });
+        var response = await _client.PostAsJsonAsync("/auth/register", new { Username, Password, Role = "Admin" });
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -121,16 +118,14 @@ public class AuthApiTests : IDisposable
 
     [Fact]
     public async Task PostAuthRegister_SecondLibrarian_ReturnsConflict()
-{
+    {
         // Arrange
-        await _client.PostAsJsonAsync("/auth/register", new { Username = "first", Password = "Test-password-1", Role = "Librarian" });
+        await _client.PostAsJsonAsync("/auth/register", new { Username = "first", Password, Role = Roles.Librarian });
 
         // Act
-        var response = await _client.PostAsJsonAsync("/auth/register", new { Username = "second", Password = "Test-password-2", Role = "Librarian" });
+        var response = await _client.PostAsJsonAsync("/auth/register", new { Username = "second", Password, Role = Roles.Librarian });
 
         // Assert
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
-
-    private record ClaimResponse(string Type, string Value);
 }

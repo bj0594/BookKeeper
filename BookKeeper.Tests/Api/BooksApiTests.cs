@@ -1,13 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
-using BookKeeper.Core.Repository;
 using BookKeeper.Core;
 
 namespace BookKeeper.Tests.Api;
 
+// Contract tests for /books in Documentation/api.md.
 public class BooksApiTests : IDisposable
 {
     private readonly WebApplicationFactory<Program> _factory;
@@ -15,14 +13,7 @@ public class BooksApiTests : IDisposable
 
     public BooksApiTests()
     {
-        // xUnit creates this class once per test, so each test gets its own API with an empty book list.
-        _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
-            builder.ConfigureTestServices(services =>
-            {
-                // Use the fake repository for testing, so we don't need a database.
-                services.AddSingleton<IBookRepository, FakeBookRepository>();
-                services.AddSingleton<IUserRepository, FakeUserRepository>();
-            }));
+        _factory = new BookKeeperFactory();
         _client = _factory.CreateClient();
     }
 
@@ -30,9 +21,10 @@ public class BooksApiTests : IDisposable
 
     private record BookResponse(Guid Id, string Title, string Author, bool IsLoaned);
 
+    // Adds a book as the librarian, so each test can start with a book that exists.
     private async Task<BookResponse> CreateBookAsync()
     {
-        var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", "Librarian");
+        var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", Roles.Librarian);
         var created = await librarian.PostAsJsonAsync("/books", new { Title = "Test Book", Author = "Test Author" });
         return (await created.Content.ReadFromJsonAsync<BookResponse>())!;
     }
@@ -41,7 +33,7 @@ public class BooksApiTests : IDisposable
     public async Task PostBooks_ValidBook_ReturnsCreatedBook()
     {
         // Arrange
-        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", "Librarian");
+        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", Roles.Librarian);
         var request = new { Title = "Test Book", Author = "Test Author" };
 
         // Act
@@ -104,7 +96,6 @@ public class BooksApiTests : IDisposable
     {
         // Arrange
         var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", Roles.Librarian);
-        var client = await AuthHelper.CreateLoggedInClientAsync(_factory, "owner");
         var book = await CreateBookAsync();
 
         // Act
@@ -201,7 +192,7 @@ public class BooksApiTests : IDisposable
     {
         // Arrange: an object that exists, and a user with the other role
         var book = await CreateBookAsync();
-        var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", "Librarian");
+        var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", Roles.Librarian);
 
         // Act
         var response = await librarian.PatchAsync($"/books/{book.Id}/loan", null);
@@ -217,7 +208,7 @@ public class BooksApiTests : IDisposable
         var book = await CreateBookAsync();
         var user = await AuthHelper.CreateLoggedInClientAsync(_factory, "user");
         await user.PatchAsync($"/books/{book.Id}/loan", null);
-        var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", "Librarian");
+        var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", Roles.Librarian);
 
         // Act
         var response = await librarian.PatchAsync($"/books/{book.Id}/return", null);
@@ -229,7 +220,7 @@ public class BooksApiTests : IDisposable
     [Fact]
     public async Task GetBooks_LibraryUser_DoesNotShowLoanedBooks()
     {
-        // Arrange: a <thing> in the state the role should not see
+        // Arrange: a loaned book
         var user = await AuthHelper.CreateLoggedInClientAsync(_factory, "user");
         var book = await CreateBookAsync();
         await user.PatchAsync($"/books/{book.Id}/loan", null);
@@ -264,10 +255,10 @@ public class BooksApiTests : IDisposable
     }
 
     [Fact]
-    public async Task GetBookLoans_NotLibraryUser_ReturnsForbidden()
-{
+    public async Task GetBooksLoans_NotLibraryUser_ReturnsForbidden()
+    {
         // Arrange: a user with the other role
-        var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", "Librarian");
+        var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", Roles.Librarian);
 
         // Act
         var response = await librarian.GetAsync("/books/loans");
@@ -277,7 +268,7 @@ public class BooksApiTests : IDisposable
     }
 
     [Fact]
-    public async Task ReturnBook_LoanedByOtherUser_ReturnsForbidden()
+    public async Task PatchBooksReturn_LoanedByOtherUser_ReturnsForbidden()
     {
         // Arrange
         var book = await CreateBookAsync();
@@ -290,5 +281,23 @@ public class BooksApiTests : IDisposable
 
         // Assert
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetBooks_Librarian_ShowsLoanedBooks()
+    {
+        // Arrange
+        var user = await AuthHelper.CreateLoggedInClientAsync(_factory, "user");
+        var librarian = await AuthHelper.CreateLoggedInClientAsync(_factory, "librarian", Roles.Librarian);
+        var book = await CreateBookAsync();
+        await user.PatchAsync($"/books/{book.Id}/loan", null);
+
+        // Act
+        var response = await librarian.GetAsync("/books");
+
+        // Assert
+        var books = await response.Content.ReadFromJsonAsync<List<BookResponse>>();
+        var found = Assert.Single(books!);
+        Assert.True(found.IsLoaned);
     }
 }

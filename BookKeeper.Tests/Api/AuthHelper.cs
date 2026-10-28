@@ -1,13 +1,14 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using BookKeeper.Core;
 
 namespace BookKeeper.Tests.Api;
 
 // Registers and logs in a user through the API, and gives a client that sends the token with every request.
 public static class AuthHelper
 {
-    public static async Task<HttpClient> CreateLoggedInClientAsync(WebApplicationFactory<Program> factory, string username, string role = "LibraryUser")
+    public static async Task<HttpClient> CreateLoggedInClientAsync(WebApplicationFactory<Program> factory, string username, string role = Roles.LibraryUser)
     {
         var client = factory.CreateClient();
         var credentials = new { Username = username, Password = "Test-password-1", Role = role };
