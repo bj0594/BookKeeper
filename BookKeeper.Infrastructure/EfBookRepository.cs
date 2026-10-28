@@ -22,6 +22,11 @@ public class EfBookRepository : IBookRepository
 
     public IReadOnlyList<Book> GetAll() => _db.Books.ToList();
 
+    public Book? GetById(Guid id) => _db.Books.Find(id);
+
+    // Filters on LoanedByUserId, because IsLoaned is not a column and can't be turned into SQL.
+    public IReadOnlyList<Book> GetAvailable() => _db.Books.Where(b => b.LoanedByUserId == null).ToList();
+
     public void Update(Book book)
     {
         _db.Books.Update(book);

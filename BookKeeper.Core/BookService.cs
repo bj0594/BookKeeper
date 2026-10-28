@@ -31,10 +31,10 @@ public class BookService
         return _repository.GetAll();
     }
 
-    // Returns only available/not loaned books. 
+    // Returns the books that are not loaned.
     public IReadOnlyList<Book> GetAvailableBooks()
     {
-        return [.. _repository.GetAll().Where(b => !b.IsLoaned)];
+        return _repository.GetAvailable();
     }
 
     // Returns the books the user has loaned.
@@ -55,7 +55,7 @@ public class BookService
         _repository.Update(book);
     }
 
-    // Marks the book as not loaned. Throws InvalidOperationException if it is not loaned or no book has the id
+    // Marks the book as not loaned. Throws InvalidOperationException if it is not loaned or no book has the id,
     // and UnauthorizedAccessException if another user has loaned it.
     public void ReturnBook(Guid bookId, Guid userId)
     {
@@ -72,8 +72,7 @@ public class BookService
         _repository.Update(book);
     }
 
-    // Removes the book from the library. Throws InvalidOperationException if no book has the id.
-    // Throws InvalidOperationException if deleting a loaned book.
+    // Removes the book from the library. Throws InvalidOperationException if it is loaned or no book has the id.
     public void DeleteBook(Guid bookId)
     {
         var book = GetBookById(bookId);
@@ -84,8 +83,9 @@ public class BookService
         _repository.Delete(book);
     }
 
+    // Same exception as the other rules, so an unknown id gives 409 Conflict in the API.
     private Book GetBookById(Guid bookId)
     {
-        return _repository.GetAll().First(b => b.Id == bookId);
+        return _repository.GetById(bookId) ?? throw new InvalidOperationException("Book was not found.");
     }
 }

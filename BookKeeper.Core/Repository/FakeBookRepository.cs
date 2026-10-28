@@ -1,5 +1,6 @@
 namespace BookKeeper.Core.Repository;
 
+// Keeps the books in memory. Used by the domain tests and the API tests instead of the database.
 public class FakeBookRepository : IBookRepository
 {
     private readonly List<Book> _books = [];
@@ -13,6 +14,10 @@ public class FakeBookRepository : IBookRepository
     {
         return _books;
     }
+
+    public Book? GetById(Guid id) => _books.FirstOrDefault(b => b.Id == id);
+
+    public IReadOnlyList<Book> GetAvailable() => _books.Where(b => b.LoanedByUserId == null).ToList();
 
     public void Delete(Book book)
     {
