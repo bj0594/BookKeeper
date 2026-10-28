@@ -35,4 +35,12 @@ public class FakeBooksClient : IBooksClient
     public List<BookDto> Loans { get; } = [];
 
     public Task<List<BookDto>> GetLoansAsync() => Task.FromResult(Loans);
+
+    public List<Guid> ReturnedIds { get; } = [];
+
+    public Task ReturnBookAsync(Guid id)
+    {
+        ReturnedIds.Add(id);
+        return Task.CompletedTask;
+    }
 }

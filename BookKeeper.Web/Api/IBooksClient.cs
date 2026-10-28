@@ -8,4 +8,5 @@ public interface IBooksClient
     Task LoanBookAsync(Guid id);
     Task DeleteBookAsync(Guid id);
     Task<List<BookDto>> GetLoansAsync();
+    Task ReturnBookAsync(Guid id);
 }

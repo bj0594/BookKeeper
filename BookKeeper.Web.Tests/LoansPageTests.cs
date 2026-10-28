@@ -28,4 +28,19 @@ public class LoansPageTests : BunitContext
         // Assert
         Assert.Equal(2, page.FindAll("li").Count);
     }
+
+    [Fact]
+    public void LoansPage_ClickReturn_SendsItToTheApi()
+    {
+        // Arrange
+        var book = new BookDto(Guid.NewGuid(), "Dune", "Frank Herbert", true, Guid.NewGuid());
+        _client.Loans.Add(book);
+        var page = Render<LoansPage>();
+
+        // Act
+        page.Find("li button.return").Click();
+
+        // Assert
+        page.WaitForAssertion(() => Assert.Contains(book.Id, _client.ReturnedIds));
+    }
 }
