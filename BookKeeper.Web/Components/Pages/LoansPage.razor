@@ -31,15 +31,23 @@ else
     private string? _error;
 
     protected override async Task OnInitializedAsync()
-{
-    if (!Tokens.IsLoggedIn)
     {
-        Navigation.NavigateTo("/login");
-        return;
-    }
+        if (!Tokens.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
 
-    _items = await Client.GetLoansAsync();
-}
+        try
+        {
+            _items = await Client.GetLoansAsync();
+        }
+        catch (HttpRequestException ex)
+        {
+            _error = ex.Message;
+            _items = [];
+        }
+    }
 
     private async Task Return(Guid id)
     {
