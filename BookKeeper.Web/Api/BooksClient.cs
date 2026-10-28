@@ -45,5 +45,8 @@ public class BooksClient : IBooksClient
         }
     }
 
-    public Task<List<BookDto>> GetLoansAsync() => throw new NotImplementedException();
+    public async Task<List<BookDto>> GetLoansAsync()
+    {
+        return await _http.GetFromJsonAsync<List<BookDto>>("books/loans") ?? [];
+    }
 }

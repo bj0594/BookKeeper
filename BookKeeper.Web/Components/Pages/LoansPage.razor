@@ -1,1 +1,29 @@
 @page "/loans"
+@rendermode InteractiveServer
+@using BookKeeper.Web.Api
+@inject IBooksClient Client
+
+<h1>My loans</h1>
+
+@if (_items is null)
+{
+    <p>Loading…</p>
+}
+else
+{
+    <ul>
+        @foreach (var item in _items)
+        {
+            <li>@item.Title by @item.Author</li>
+        }
+    </ul>
+}
+
+@code {
+    private List<BookDto>? _items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _items = await Client.GetLoansAsync();
+    }
+}
