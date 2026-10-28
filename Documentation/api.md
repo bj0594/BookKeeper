@@ -13,6 +13,12 @@ Request: { "username": "anna", "password": "Secret-123" }
 Response: 200 OK + { "token": "eyJ…" }
 Errors: 401 Unauthorized (wrong username or password)
 
+GET /auth/me
+Auth: Bearer token
+Request: none
+Response: 200 OK + array of the claims in the token, each with type and value (user id, username and role)
+Errors: 401 Unauthorized (no valid token)
+
 GET /books
 Auth: Bearer token
 Request: none
