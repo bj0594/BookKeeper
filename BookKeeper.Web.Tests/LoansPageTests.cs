@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using BookKeeper.Web.Api;
 using BookKeeper.Web.Components.Pages;
 using Microsoft.AspNetCore.Components;
+using System.Net;
 
 namespace BookKeeper.Web.Tests;
 
@@ -73,5 +74,18 @@ public class LoansPageTests : BunitContext
 
         // Assert
         page.WaitForAssertion(() => Assert.Contains("Book is loaned by another user.", page.Find(".error").TextContent));
+    }
+
+    [Fact]
+    public void LoansPage_LoadRejected_ShowsMessage()
+    {
+        // Arrange
+        _client.LoadFail = new HttpRequestException("You are not allowed to do that.", null, HttpStatusCode.Forbidden);
+
+        // Act
+        var page = Render<LoansPage>();
+
+        // Assert
+        Assert.Contains("You are not allowed to do that.", page.Find(".error").TextContent);
     }
 }
