@@ -1,0 +1,16 @@
+@page "/logout"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using BookKeeper.Web.Api
+@inject TokenStore Tokens
+@inject NavigationManager Navigation
+
+<p>Logging out…</p>
+
+@code {
+    // Forgets the token and the role, so the next user in this tab has to log in.
+    protected override void OnInitialized()
+    {
+        Tokens.LogOut();
+        Navigation.NavigateTo("/login");
+    }
+}

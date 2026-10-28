@@ -143,3 +143,25 @@ li button:first-of-type {
     background: #fdecea;
     color: var(--danger);
 }
+
+nav .spacer {
+    flex: 1;
+}
+
+.button.secondary {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+}
+
+.button.secondary:hover {
+    background: #e8efec;
+}
+
+.status {
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: #fff4e5;
+    color: #8a4b00;
+    font-size: 0.85rem;
+}
