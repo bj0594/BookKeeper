@@ -119,7 +119,7 @@ Manual checks (assignment 3, against the API in Docker Compose with BookKeeper.A
 - [x] In pgAdmin: Users has only the hash in PasswordHash. While the book is loaned, LoanedByUserId in Books is the user's id. After the return it is NULL
 
 Frontend:
-- [ ] Books page shows the list from the API
+- [x] Books page shows the list from the API
 - [ ] Books page sends a new book to the API
 - [ ] Books page sends a loan for one book
 - [ ] Books page sends a delete for one book
