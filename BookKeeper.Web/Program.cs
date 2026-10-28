@@ -1,10 +1,15 @@
 using BookKeeper.Web.Components;
+using BookKeeper.Web.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// The pages get BooksClient when they ask for IBooksClient. ApiBaseUrl is the address of the API.
+builder.Services.AddHttpClient<IBooksClient, BooksClient>(client =>
+    client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"]!));
 
 var app = builder.Build();
 
