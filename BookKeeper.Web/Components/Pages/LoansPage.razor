@@ -1,6 +1,7 @@
 @page "/loans"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using BookKeeper.Web.Api
+@using System.Net;
 @inject IBooksClient Client
 @inject TokenStore Tokens
 @inject NavigationManager Navigation
@@ -41,6 +42,14 @@ else
         try
         {
             _items = await Client.GetLoansAsync();
+        }
+
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            // The token has expired: log out, and let the user log in again.
+            Tokens.Token = null;
+            Tokens.Role = null;
+            Navigation.NavigateTo("/login");
         }
         catch (HttpRequestException ex)
         {
