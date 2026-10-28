@@ -2,6 +2,7 @@ using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using BookKeeper.Web.Api;
 using BookKeeper.Web.Components.Pages;
+using Microsoft.AspNetCore.Components;
 
 namespace BookKeeper.Web.Tests;
 
@@ -9,10 +10,12 @@ namespace BookKeeper.Web.Tests;
 public class BooksPageTests : BunitContext
 {
     private readonly FakeBooksClient _client = new ();
+    private readonly TokenStore _tokens = new() { Token = "test" };
 
     public BooksPageTests()
     {
         Services.AddSingleton<IBooksClient>(_client);
+        Services.AddSingleton(_tokens);
     }
 
     [Fact]
@@ -87,5 +90,19 @@ public class BooksPageTests : BunitContext
 
         // Assert
         page.WaitForAssertion(() => Assert.Contains("Book must be returned before deleting.", page.Find(".error").TextContent));
+    }
+
+    [Fact]
+    public void BooksPage_NotLoggedIn_GoesToLogin()
+    {
+        // Arrange
+        _tokens.Token = null;
+        var navigation = Services.GetRequiredService<NavigationManager>();
+
+        // Act
+        Render<BooksPage>();
+
+        // Assert
+        Assert.EndsWith("/login", navigation.Uri);
     }
 }
