@@ -1,16 +1,16 @@
 # Specification – BookKeeper
 
 ## 1 The assignment in my own words
-A library system for librarians that keeps track of which books the library has and which of them are loaned out.
-The user can add, list, loan out, return and delete books.
+A library system that keeps track of which books the library has and which of them are loaned out, and by whom.
+The librarian adds, lists and deletes books. Library users see the available books, loan them, see their own loans and return them.
 The domain logic is built with TDD and then made available through a REST API.
 Assignment 2: the API runs in Docker, stores the books in PostgreSQL through EF Core, and the whole system starts with Docker Compose (API, PostgreSQL, pgAdmin and Traefik), with a health check. No new functionality.
-Assignment 3: the API now provides registration and login, and can create users, control passwords and generate JWT-tokens. The tokens are used to identify the user and limit data access. There are two types of users: librarians and library users.
+Assignment 3: the API provides registration and login. It creates users, hashes and checks passwords, and returns a JWT after a successful login. The token identifies the user and their role, and limits what they can see and do.
 Delivered as a GitHub repo with tests and a README.
 
 ## 2 Requirements
 Main flow (assignment 3):
-A user creates an account, chooses to be a librarian or library user, logs in.
+A user creates an account, chooses to be a librarian or library user, and logs in.
 
 If librarian:
 Adds a book, sees it in the list, deletes it.
@@ -19,31 +19,40 @@ If library user:
 Sees an available book in the list, loans it, sees a list of their loans, returns it.
 
 Core (MUST):
-- Add a book        ✔ AddBook_ValidBook_AddsBookToLibrary, PostBooks_ValidBook_ReturnsCreatedBook
-- List all books    ✔ AddBook_ValidBook_AddsBookToLibrary (via GetBooks), GetBooks_AfterBookAdded_ReturnsOkWithList
-- List all available 
-  books (assignment 3) ✔ GetAvailableBooks_OneIsLoaned_ReturnsOnlyTheOther
-- List own loans 
-  (assignment 3)    ✔ GetLoans_TwoUsers_ReturnsOnlyOwn
-- Loan a book       ✔ LoanBook_ExistingBook_BecomesLoaned, PatchBooksLoan_ExistingBook_ReturnsNoContent
-- Return a book     ✔ ReturnBook_ExistingLoanedBook_BecomesNotLoaned, PatchBooksReturn_LoanedBook_ReturnsNoContent
-- Delete a book     ✔ DeleteBook_ExistingBook_RemovesBookFromLibrary, DeleteBooks_ExistingBook_ReturnsNoContent
-- REST API          ✔ BooksApiTests (every line in api.md)
+- Add a book               ✔ AddBook_ValidBook_AddsBookToLibrary, PostBooks_ValidBook_ReturnsCreatedBook
+- List the books           ✔ GetBooks_AfterBookAdded_ReturnsOkWithList
+- List available books     ✔ GetAvailableBooks_OneIsLoaned_ReturnsOnlyTheOther
+- List own loans           ✔ GetLoans_TwoUsers_ReturnsOnlyOwn, GetBooksLoans_TwoUsers_ReturnsOnlyOwn
+- Loan a book              ✔ LoanBook_ExistingBook_BecomesLoaned, LoanBook_ExistingBook_SetsLoanedByUserId, PatchBooksLoan_ExistingBook_ReturnsNoContent
+- Return a book            ✔ ReturnBook_ExistingLoanedBook_BecomesNotLoaned, ReturnBook_LoanedBook_RemovesItFromGetLoans, PatchBooksReturn_LoanedBook_ReturnsNoContent
+- Delete a book            ✔ DeleteBook_ExistingBook_RemovesBookFromLibrary, DeleteBooks_ExistingBook_ReturnsNoContent
+- REST API                 ✔ BooksApiTests and AuthApiTests (every line in api.md)
+
+Users and login (assignment 3):
+- Register a user                        ✔ PostAuthRegister_NewUser_ReturnsCreated
+- A username can only be used once       ✔ PostAuthRegister_TakenUsername_ReturnsConflict
+- The password is stored as a hash       ✔ PostAuthRegister_NewUser_StoresOnlyHash
+- Log in and get a JWT                   ✔ PostAuthLogin_ValidCredentials_ReturnsToken
+- A wrong password gives no token        ✔ PostAuthLogin_WrongPassword_ReturnsUnauthorized
+- The token identifies the user          ✔ GetAuthMe_WithToken_ReturnsUsername
+- No valid token gives 401               ✔ GetBooks_WithoutToken_ReturnsUnauthorized
 
 Rules:
-- Can't loan a book that's already loaned out  ✔ LoanBook_AlreadyLoaned_ThrowsException, PatchBooksLoan_AlreadyLoaned_ReturnsConflict
-- Can't return a book that hasn't been loaned  ✔ ReturnBook_NotLoanedBook_ThrowsException, PatchBooksReturn_NotLoaned_ReturnsConflict
-- More than one librarian can't be created (assignment 3)
-- Only a librarian can add or delete books (assignment 3)
-- Only a library user can loan and return books (assignment 3)
-- Can't delete a loaned out book (assignment 3) ✔ DeleteBook_AlreadyLoaned_ThrowsInvalidOperationException
-- A librarian can see the whole list of every book (assignment 3)
-- A library user can only see available books (assignment 3)
+- Can't loan a book that's already loaned out   ✔ LoanBook_AlreadyLoaned_ThrowsException, PatchBooksLoan_AlreadyLoaned_ReturnsConflict
+- Can't return a book that hasn't been loaned   ✔ ReturnBook_NotLoanedBook_ThrowsException, PatchBooksReturn_NotLoaned_ReturnsConflict
+- Can't delete a loaned out book (assignment 3) ✔ DeleteBook_AlreadyLoaned_ThrowsInvalidOperationException, DeleteBooks_LoanedBook_ReturnsConflict
 
-Ownership rules:
-- A user can only view their own loans (assignment 3) ✔ GetLoans_TwoUsers_ReturnsOnlyOwn
-- A user can't return another user's loan (assignment 3) ✔ ReturnBook_OtherUsersLoan_ThrowsUnauthorizedAccessException
-- Endpoints that require authorization can't be used without a valid token (401) (assignment 3)
+Role rules (assignment 3):
+- The role is Librarian or LibraryUser                ✔ PostAuthRegister_InvalidRole_ReturnsBadRequest
+- Only one librarian can be created                   ✔ PostAuthRegister_SecondLibrarian_ReturnsConflict
+- Only the librarian can add or delete books          ✔ PostBooks_NotLibrarian_ReturnsForbidden, DeleteBooks_NotLibrarian_ReturnsForbidden
+- Only library users can loan, return and see loans   ✔ PatchBooksLoan_NotLibraryUser_ReturnsForbidden, PatchBooksReturn_NotLibraryUser_ReturnsForbidden, GetBooksLoans_NotLibraryUser_ReturnsForbidden
+- The librarian sees every book                       ✔ GetBooks_Librarian_ShowsLoanedBooks
+- A library user only sees available books            ✔ GetBooks_LibraryUser_DoesNotShowLoanedBooks
+
+Ownership rules (assignment 3):
+- A user only sees their own loans         ✔ GetLoans_TwoUsers_ReturnsOnlyOwn, GetBooksLoans_TwoUsers_ReturnsOnlyOwn
+- A user can't return another user's loan  ✔ ReturnBook_OtherUsersLoan_ThrowsUnauthorizedAccessException, PatchBooksReturn_LoanedByOtherUser_ReturnsForbidden
 
 ## 3 Flow
 ![Flow](../Excalidraw/flow.png)
@@ -64,14 +73,24 @@ BookService
                                                       another user's loan: UnauthorizedAccessException
 - void DeleteBook(Guid id)                         -> book is removed
                                                       book is loaned: InvalidOperationException
+  Unknown id in loan, return and delete: InvalidOperationException
+
+AuthService
+- User Register(string username, string password, string role) -> new user, with the password hashed by BCrypt
+                                                      username taken or a librarian exists: InvalidOperationException
+                                                      unknown role: ArgumentException
+- string Login(string username, string password)   -> JWT with the user id (sub), the username and the role
+                                                      wrong username or password: UnauthorizedAccessException
 
 Book: Id (Guid), Title (string), Author (string), LoanedByUserId (Guid?, empty when the book is available), IsLoaned (bool, true when LoanedByUserId has a value)
 Example: 3f2c..., "The Great Gatsby", "F. Scott Fitzgerald", 2a6f..., true
+
+User: Id (Guid), Username (string, unique), PasswordHash (string), Role (Librarian or LibraryUser)
 ```
 
-Dependencies: IBookRepository
-- EfBookRepository (BookKeeper.Infrastructure) stores the books in PostgreSQL. Used by the API.
-- FakeBookRepository (BookKeeper.Core) keeps the books in memory. Used by the domain tests and the API tests.
+Dependencies:
+- BookService depends only on IBookRepository. EfBookRepository (BookKeeper.Infrastructure) stores the books in PostgreSQL and is used by the API. FakeBookRepository (BookKeeper.Core) keeps them in memory and is used by the tests.
+- AuthService depends only on IUserRepository. EfUserRepository stores the users in PostgreSQL and is used by the API. FakeUserRepository keeps them in memory and is used by the API tests.
 
 ## 5 Test list
 - [x] A new book can be added
@@ -86,9 +105,16 @@ Dependencies: IBookRepository
 - [x] The list of available books won't show loaned books
 - [x] User can't return other's loans
 - [x] A returned book is no longer in the user's loan
+- [x] A user can register, and only the hash of the password is stored
+- [x] A user can log in and gets a token. A wrong password gives 401
+- [x] Only known roles, and only one librarian
+- [x] The book endpoints give 401 without a token, and 403 with the wrong role
+- [x] The librarian sees every book, and a library user only the available ones
 
-Manual checks:
-- [ ] Check if data is stored properly in PostgreSQL
+Manual checks (assignment 3, against the API in Docker Compose with BookKeeper.Api.http):
+- [x] The whole flow works against PostgreSQL: register, log in, send the token, add a book, loan it, see it in my loans, return it
+- [x] A second library user does not see the loan, and gets 403 when returning it
+- [x] In pgAdmin: Users has only the hash in PasswordHash. While the book is loaned, LoanedByUserId in Books is the user's id. After the return it is NULL
 
 Later questions:
 - [x] Can a user loan several books?
@@ -97,12 +123,12 @@ Later questions:
 ## 6 Questions, assumptions and decisions
 - Clarified: The repo will be used for the coming assignments
 - Assumption: "4–5 tests" in the grading means domain tests only (part 2 of the assignment asks for 4–5 tests for the domain logic)
-- Decision: 6 domain tests instead of 4–5. The assignment allows more tests when needed for the main rules of the MVP, and each of the two rules has its own test
+- Decision: 6 domain tests instead of 4–5 in assignment 1, because each of the two rules has its own test. Assignment 3 added 6 more for the new rules
 - Decision: Returning a book that is not loaned gives an error (InvalidOperationException)
-- Decision: The option to loan several books and/or add multiple copies of the same book is not essential to the MVP. It will not be added at this time, but might be in the future
-- Decision: Unknown id is not handled in the MVP, because the user always picks a book from the list
-- Clarified: The instructor requires IBookRepository and FakeBookRepository before assignment 2, added as a refactor. BookService only depends on IBookRepository
-- Decision: No handling of storage failure. The assignment does not require it. If the database is down, the API returns 500, and `/health` reports `Unhealthy`
+- Decision: Loaning several copies of the same book is not essential to the MVP. It might be added later
+- Clarified: The instructor requires IBookRepository and FakeBookRepository before assignment 2, added as a refactor
+- Decision: No handling of storage failure. If the database is down, the API returns 500, and `/health` reports `Unhealthy`
+
 - Decision (assignment 2): EF Core with PostgreSQL, in its own project (BookKeeper.Infrastructure), so BookKeeper.Core does not know about the database
 - Decision (assignment 2): BookService calls IBookRepository.Update after loan and return, so the change is saved in the database
 - Decision (assignment 2): The API runs the migrations when it starts in Docker Compose (`Database__MigrateOnStartup`), so the tables are created without manual steps
@@ -112,18 +138,15 @@ Later questions:
 - Decision (assignment 2): The database and pgAdmin passwords are in docker-compose.yaml. They are only for local development
 
 - Clarified (assignment 3): Only the assignment text applies. The grading criteria at the bottom of the assignment, the guide and the deadline are not taken into account
+- Decision (assignment 3): Two roles, Librarian and LibraryUser. The role is chosen at registration, and only one librarian can be created, because the system is a single library
+- Decision (assignment 3): How part 2 fits loans: the books belong to the library, so only the librarian creates and deletes them. What belongs to a user is the loan. Creating your own data is loaning a book, changing it is returning it, and a loan is deleted by returning it
+- Decision (assignment 3): A book stores the id of the user who loaned it (LoanedByUserId), and IsLoaned is computed from it. There is no separate loan type, because the flow only needs to know which user has each book
+- Decision (assignment 3): Another user's loan gives 403 Forbidden, because the book exists and the user can see it in the list
+- Decision (assignment 3): The token is created in AuthService (CreateToken), not in a separate JwtService. Login and the token it returns are one step, so they stay in one class. It uses the same Jwt settings as the token check in Program.cs
 - Decision (assignment 3): The JWT secret is in appsettings.json (the assignment asks for it)
-- Decision (assignment 3): Another user's data gives 403 Forbidden (most accurately represents the user experience)
 - Decision (assignment 3): Scalar stays as the API reference, also for the token (already used in the project)
-- Decision (assignment 3): Two types of users, librarian and library user (roles). Data that belongs to a user still has a user id
-- Decision (assignment 3): The role is chosen at registration, and only one librarian can be created (the system is a single library with one librarian)
-- Decision (assignment 3): A book stores the id of the user who loaned it (LoanedByUserId). There is no separate loan type, because the flow only needs to know which user has each book
-- Decision (assignment 3): LoanedByUserId replaces IsLoaned. A book is loaned when LoanedByUserId has a value, so the information is only stored one place
-- Decision (assignment 3): BookService still only depends on IBookRepository
+- Decision (assignment 3): Docker stays as it is, and no CI (not part of this assignment)
 
-- Limitation: An unknown id gives 409 Conflict on loan and return, and 500 on delete (no unknown id handling in the MVP)
+- Limitation: An unknown id gives 409 Conflict on loan, return and delete (no separate unknown id handling in the MVP, because the user picks a book from the list)
 - Limitation: An empty title or author is accepted
-- Limitation: Every operation on one book loads all books from the database (`GetAll`), which is fine for a small library
-
-- Decision (assignment 3): Docker stays as it is (not part of this assignment)
-- Decision (assignment 3): No CI (not required)
+- Limitation (assignment 3): Users registered before the AddUserRole migration have an empty role, and can't use the book endpoints. `docker compose down -v` starts with an empty database

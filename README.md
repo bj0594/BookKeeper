@@ -1,6 +1,6 @@
 # BookKeeper
 
-BookKeeper is a small library system. A user can add books, list them, loan a book out, return it and delete it. The domain logic and the API contract were both built with test-driven development (red, green, refactor). The API stores the books in PostgreSQL through EF Core, and the whole system runs with Docker Compose.
+BookKeeper is a small library system. Users register and log in with a JWT, and have one of two roles: the librarian adds and deletes books and sees every book, and library users see the available books, loan them, see their own loans and return them. Each loan is tied to the user who made it, so a user only sees and returns their own loans. The domain logic and the API contract were both built with test-driven development (red, green, refactor). The API stores the books in PostgreSQL through EF Core, and the whole system runs with Docker Compose.
 
 ## Requirements
 
@@ -15,11 +15,11 @@ From the repository root:
 dotnet test
 ```
 
-This runs 13 tests:
-- 6 domain tests for `BookService` (`BookKeeper.Tests/Domain`)
-- 7 API contract tests, one for each `/books` line in `Documentation/api.md` (`BookKeeper.Tests/Api`)
+This runs 38 tests:
+- 12 domain tests for `BookService` (`BookKeeper.Tests/Domain`)
+- 26 API contract tests, one for each line in `Documentation/api.md`: 18 for `/books` and 8 for `/auth` (`BookKeeper.Tests/Api`)
 
-The tests use `FakeBookRepository`, so they do not need Docker or a database.
+The tests use `FakeBookRepository` and `FakeUserRepository`, so they do not need Docker or a database. The API tests register and log in through the API, and send the token like a real client.
 
 ## Run with Docker Compose
 
@@ -54,19 +54,19 @@ docker compose ps
 2. Right-click **Servers** → **Register** → **Server**. Give it any name under **General**.
 3. Under **Connection**: host `db`, port `5432`, maintenance database `bookkeeper`, username `bookkeeper`, password `password`.
 4. Open **Servers** → your server → **Databases** → `bookkeeper` → **Schemas** → `public` → **Tables**.
-5. Right-click `Books` → **View/Edit Data** → **All Rows**.
+5. Right-click `Books` or `Users` → **View/Edit Data** → **All Rows**. `Users` stores only the BCrypt hash of each password, and `LoanedByUserId` in `Books` is the id of the user who has the book.
 
 The host is `db`, the service name in `docker-compose.yaml`, because pgAdmin runs in the same Docker network as the database.
 
 ### Where the data is stored
 
-The books are stored in PostgreSQL, in the Docker volume `db_data`. They survive a restart of the API container (`docker compose restart api`) and `docker compose down`.
+The books and the users are stored in PostgreSQL, in the Docker volume `db_data`. They survive a restart of the API container (`docker compose restart api`) and `docker compose down`.
 
 | Command | What it does |
 |---|---|
 | `docker compose stop` | Stops all services. `docker compose start` starts them again. |
 | `docker compose down` | Removes the containers, keeps the data. pgAdmin forgets the registered server. |
-| `docker compose down -v` | Also deletes the volume, so all books are gone. |
+| `docker compose down -v` | Also deletes the volume, so all books and users are gone. |
 
 ### Build and run the API image alone
 
@@ -90,9 +90,19 @@ dotnet run --project BookKeeper.Api
 ```
 
 - The connection string uses `localhost` instead of `db`, because the API runs on your machine, outside the Docker network.
-- `dotnet user-secrets set` and `dotnet tool install` are only needed once. `database update` is only needed when the tables do not exist yet.
+- `dotnet user-secrets set` and `dotnet tool install` are only needed once. `database update` is only needed when the tables do not exist yet, or after a new migration.
 
 The API runs on `http://localhost:5135`.
+
+## Log in
+
+There are two roles. One librarian adds and deletes books. Library users loan and return them.
+
+1. Register: `POST /auth/register` with `{ "username": "anna", "password": "Secret-123", "role": "LibraryUser" }`. Use `"role": "Librarian"` for the librarian. Only one librarian can be registered.
+2. Log in: `POST /auth/login` with the username and password, and copy `token` from the response.
+3. Send the token with each request, as `Authorization: Bearer <token>`.
+
+Without a valid token, the book endpoints answer `401 Unauthorized`. With the wrong role, they answer `403 Forbidden`. The token is valid for one hour. `GET /auth/me` shows the claims in your token.
 
 ## Test the API manually
 
@@ -102,13 +112,14 @@ There are two ways to test the API by hand. Both send real HTTP requests to the 
 
 Open `http://localhost:8080/scalar` in a browser while the API runs in Docker Compose (`http://localhost:5135/scalar` with `dotnet run`). Scalar lists every endpoint and lets you send requests by clicking **Test Request**.
 
-1. Send `POST /books` with a title and an author in the body.
-2. Copy the `id` from the response.
-3. Paste it as `bookId` in loan, return and delete.
+1. Register and log in with `/auth/register` and `/auth/login` (see **Log in**), and copy the `token`.
+2. Paste the token under **Authentication** at the top of the page. Scalar sends it with every request.
+3. As the librarian, send `POST /books` with a title and an author in the body, and copy the `id` from the response.
+4. Paste it as `bookId` in loan and return (as a library user) and delete (as the librarian). Log in again and paste the other token to switch user.
 
 ### REST Client
 
-Open `BookKeeper.Api/BookKeeper.Api.http` in VS Code with the REST Client extension installed, and click **Send Request** above each request, from top to bottom. The file covers every line in `api.md`, including the two 409 errors and the health check, and reuses the `id` from the first request automatically. `@host` at the top is `http://localhost:8080` for Docker Compose. Change it to `http://localhost:5135` for `dotnet run`.
+Open `BookKeeper.Api/BookKeeper.Api.http` in VS Code with the REST Client extension installed, and click **Send Request** above each request, from top to bottom. The file registers and logs in a librarian and two library users, and runs the whole flow with the right token on each request, including every error in `api.md` and the health check. It reuses the tokens and the book `id` from earlier responses automatically. `@host` at the top is `http://localhost:8080` for Docker Compose. Change it to `http://localhost:5135` for `dotnet run`.
 
 ### Why both
 
@@ -119,16 +130,18 @@ Open `BookKeeper.Api/BookKeeper.Api.http` in VS Code with the REST Client extens
 
 | Folder or file | Content |
 |---|---|
-| `BookKeeper.Core` | Domain logic: `Book` and `BookService`, and `IBookRepository` with `FakeBookRepository` (`Repository/`) |
-| `BookKeeper.Infrastructure` | Data access with EF Core: `BookKeeperDbContext`, `EfBookRepository` and the migrations (`Migrations/`) |
-| `BookKeeper.Api` | REST API: controller, request type, `Program.cs` and the `Dockerfile` |
+| `BookKeeper.Core` | Domain logic: `Book`, `BookService`, `User` and `Roles`, and the repository interfaces with their fakes (`Repository/`) |
+| `BookKeeper.Infrastructure` | Data access with EF Core: `BookKeeperDbContext`, `EfBookRepository`, `EfUserRepository` and the migrations (`Migrations/`) |
+| `BookKeeper.Api` | REST API: controllers, `Program.cs` and the `Dockerfile` |
+| `BookKeeper.Api/Auth` | Registration and login (`AuthService`), password hashing with BCrypt (`PasswordHasher`), and the token setup for Scalar |
+| `BookKeeper.Api/Dtos` | Request bodies: `RegisterRequest`, `LoginRequest` and `CreateBookRequest` |
 | `BookKeeper.Tests/Domain` | Domain tests |
-| `BookKeeper.Tests/Api` | API contract tests |
+| `BookKeeper.Tests/Api` | API contract tests, `AuthHelper` (logs in a test user) and `BookKeeperFactory` (the API with the fakes) |
 | `docker-compose.yaml` | The API, PostgreSQL, pgAdmin and Traefik |
 | `Excalidraw` | Sketch of the MVP flow (`flow.excalidraw` and `flow.png`) |
 | `Documentation` | Specification and API contract |
 
-`BookService` only depends on `IBookRepository`. The API uses `EfBookRepository` (PostgreSQL), and the tests use `FakeBookRepository` (memory).
+`BookService` only depends on `IBookRepository`, and `AuthService` on `IUserRepository`. The API uses `EfBookRepository` and `EfUserRepository` (PostgreSQL), and the tests use `FakeBookRepository` and `FakeUserRepository` (memory). The controllers read the user id from the token and pass it to `BookService`, which passes it to the repository.
 
 ## Documentation
 
