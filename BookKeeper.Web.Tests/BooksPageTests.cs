@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using BookKeeper.Web.Api;
 using BookKeeper.Web.Components.Pages;
 using Microsoft.AspNetCore.Components;
+using System.Net;
 
 namespace BookKeeper.Web.Tests;
 
@@ -104,5 +105,20 @@ public class BooksPageTests : BunitContext
 
         // Assert
         Assert.EndsWith("/login", navigation.Uri);
+    }
+
+    [Fact]
+    public void BooksPage_TokenExpired_GoesToLogin()
+    {
+        // Arrange
+        _client.LoadFail = new HttpRequestException("", null, HttpStatusCode.Unauthorized);
+        var navigation = Services.GetRequiredService<NavigationManager>();
+
+        // Act
+        Render<BooksPage>();
+
+        // Assert
+        Assert.EndsWith("/login", navigation.Uri);
+        Assert.False(_tokens.IsLoggedIn);
     }
 }
