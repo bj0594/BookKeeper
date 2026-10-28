@@ -37,7 +37,7 @@ POST {{host}}/books
 Authorization: Bearer {{librarian.response.body.$.token}}
 Content-Type: application/json
 
-{ "title": "Dune" }
+{ "title": "Dune", "author": "Frank Herbert" }
 
 ### List books (user)
 GET {{host}}/books
