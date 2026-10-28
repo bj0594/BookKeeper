@@ -2,6 +2,7 @@ using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using BookKeeper.Web.Api;
 using BookKeeper.Web.Components.Pages;
+using Microsoft.AspNetCore.Components;
 
 namespace BookKeeper.Web.Tests;
 
@@ -9,6 +10,7 @@ namespace BookKeeper.Web.Tests;
 public class LoansPageTests : BunitContext
 {
     private readonly FakeBooksClient _client = new();
+    private readonly TokenStore _tokens = new() { Token = "test" };
 
     public LoansPageTests()
     {
@@ -42,5 +44,19 @@ public class LoansPageTests : BunitContext
 
         // Assert
         page.WaitForAssertion(() => Assert.Contains(book.Id, _client.ReturnedIds));
+    }
+
+    [Fact]
+    public void LoansPage_NotLoggedIn_GoesToLogin()
+    {
+        // Arrange
+        _tokens.Token = null;
+        var navigation = Services.GetRequiredService<NavigationManager>();
+
+        // Act
+        Render<BooksPage>();
+
+        // Assert
+        Assert.EndsWith("/login", navigation.Uri);
     }
 }
