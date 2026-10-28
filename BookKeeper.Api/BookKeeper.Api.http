@@ -1,29 +1,60 @@
 # http://localhost:8080 with Docker Compose, http://localhost:5135 with dotnet run
 @host = http://localhost:8080
 
-# @name createBook
-POST {{host}}/books
+### Register librarian
+POST {{host}}/auth/register
 Content-Type: application/json
 
-{ "title": "Dune", "author": "Frank Herbert" }
+{ "username": "librarian", "password": "Test-password-1", "role": "Librarian" }
 
-### List all books
+### Log in librarian
+# @name librarian
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{ "username": "librarian", "password": "Test-password-1" }
+
+### Register user
+POST {{host}}/auth/register
+Content-Type: application/json
+
+{ "username": "user", "password": "Test-password-1", "role": "LibraryUser" }
+
+### Log in user
+# @name user
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{ "username": "user", "password": "Test-password-1" }
+
+### Who am I (user)
+GET {{host}}/auth/me
+Authorization: Bearer {{user.response.body.$.token}}
+
+### Add a book (librarian)
+# @name addBook
+POST {{host}}/books
+Authorization: Bearer {{librarian.response.body.$.token}}
+Content-Type: application/json
+
+{ "title": "Dune" }
+
+### List books (user)
 GET {{host}}/books
+Authorization: Bearer {{user.response.body.$.token}}
 
-### Loan the book
-PATCH {{host}}/books/{{createBook.response.body.$.id}}/loan
+### Loan the book (user)
+PATCH {{host}}/books/{{addBook.response.body.$.id}}/loan
+Authorization: Bearer {{user.response.body.$.token}}
 
-### Loan the same book again (expect 409)
-PATCH {{host}}/books/{{createBook.response.body.$.id}}/loan
+### My loans (user)
+GET {{host}}/books/loans
+Authorization: Bearer {{user.response.body.$.token}}
 
-### Return the book
-PATCH {{host}}/books/{{createBook.response.body.$.id}}/return
+### Return the book (user)
+PATCH {{host}}/books/{{addBook.response.body.$.id}}/return
+Authorization: Bearer {{user.response.body.$.token}}
 
-### Return the same book again (expect 409)
-PATCH {{host}}/books/{{createBook.response.body.$.id}}/return
-
-### Delete the book
-DELETE {{host}}/books/{{createBook.response.body.$.id}}
-
-### Check health
-GET {{host}}/health
+### Delete the book (librarian)
+DELETE {{host}}/books/{{addBook.response.body.$.id}}
+Authorization: Bearer {{librarian.response.body.$.token}}
