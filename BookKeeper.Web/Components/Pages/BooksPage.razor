@@ -44,16 +44,30 @@ else
 
     private async Task Add()
     {
-        await Client.AddBookAsync(_newTitle, _newAuthor);
-        _newTitle = "";
-        _newAuthor = "";
-        _items = await Client.GetBooksAsync();
+        try
+        {
+            await Client.AddBookAsync(_newTitle, _newAuthor);
+            _newTitle = "";
+            _newAuthor = "";
+            _items = await Client.GetBooksAsync();
+        }
+        catch (HttpRequestException ex)
+        {
+            _error = ex.Message;
+        }
     }
 
     private async Task Loan(Guid id)
     {
-        await Client.LoanBookAsync(id);
-        _items = await Client.GetBooksAsync();
+        try
+        {
+            await Client.LoanBookAsync(id);
+            _items = await Client.GetBooksAsync();
+        }
+        catch (HttpRequestException ex)
+        {
+            _error = ex.Message;
+        }
     }
 
     private async Task Delete(Guid id)

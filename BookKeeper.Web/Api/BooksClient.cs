@@ -20,13 +20,13 @@ public class BooksClient : IBooksClient
     public async Task AddBookAsync(string title, string author)
     {
         var response = await _http.PostAsJsonAsync("books", new { title, author });
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessAsync(response);
     }
 
     public async Task LoanBookAsync(Guid id)
     {
         var response = await _http.PatchAsync($"books/{id}/loan", null);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessAsync(response);
     }
 
     public async Task DeleteBookAsync(Guid id)
