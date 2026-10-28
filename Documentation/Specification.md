@@ -6,13 +6,14 @@ The librarian adds, lists and deletes books. Library users see the available boo
 The domain logic is built with TDD and then made available through a REST API.
 Assignment 2: the API runs in Docker, stores the books in PostgreSQL through EF Core, and the whole system starts with Docker Compose (API, PostgreSQL, pgAdmin and Traefik), with a health check. No new functionality.
 Assignment 3: the API provides registration and login. It creates users, hashes and checks passwords, and returns a JWT after a successful login. The token identifies the user and their role, and limits what they can see and do.
+Frontend (optional, assignment 3): a Blazor app where the main flow can be done in the browser. It only talks to the API.
 Delivered as a GitHub repo with tests and a README.
 
 ## 2 Requirements
 Main flow (assignment 3):
 A user creates an account, chooses to be a librarian or library user, and logs in.
 
-Frontend: the main flow can be done in the browser (Books, Loans)
+Frontend: the main flow can be done in the browser (Register, Log in, Books, My loans, Log out)  ✔ BooksPage_TwoFromApi_ShowsBoth, BooksPage_AddBook_SendsItToTheApi, BooksPage_ClickLoan_SendsItToTheApi, BooksPage_ClickDelete_SendsItToTheApi, BooksPage_DeleteRejected_ShowsMessage, BooksPage_AddAfterRejectedDelete_ClearsMessage, BooksPage_NotLoggedIn_GoesToLogin, BooksPage_TokenExpired_GoesToLogin, BooksPage_LibraryUser_HidesAddAndDelete, BooksPage_Librarian_HidesLoan, BooksPage_LoanedBook_ShowsLoaned, LoansPage_TwoLoans_ShowsBoth, LoansPage_ClickReturn_SendsItToTheApi, LoansPage_NotLoggedIn_GoesToLogin, LoansPage_ReturnRejected_ShowsMessage, LoansPage_LoadRejected_ShowsMessage, LoansPage_TokenExpired_GoesToLogin, LoginPage_WrongPassword_ShowsError, LoginPage_ValidLogin_GoesToBooks, RegisterPage_UsernameTaken_ShowsError, RegisterPage_NewUser_GoesToLogin, LogoutPage_LoggedIn_ForgetsTokenAndGoesToLogin, LoanBook_Forbidden_ThrowsWithMessage
 
 If librarian:
 Adds a book, sees it in the list, deletes it.
@@ -129,6 +130,24 @@ Frontend:
 - [x] Login page shows an error for a wrong password
 - [x] Books page sends a logged-out user to the login page
 - [x] Loans page sends a logged-out user to the login page
+- [x] Books client gives a message when the API answers 403 without one
+- [x] Loans page shows the error message from the API
+- [x] Loans page shows a message when the API rejects the list
+- [x] Books page sends the user to the login page when the token has expired
+- [x] Loans page sends the user to the login page when the token has expired
+- [x] Books page clears the error message when the next action works
+- [x] Login page sends the user to the books page after logging in
+- [x] Register page shows an error when the username is taken
+- [x] Register page sends a new user to the login page
+- [x] Logout page forgets the token and goes to the login page
+- [x] Books page hides add and delete for a library user
+- [x] Books page hides loan for the librarian
+- [x] Books page marks loaned books
+
+Manual checks (frontend, in the browser with Docker Compose on http://localhost:5100):
+- [x] The main flow works in the browser, as Librarian and as LibraryUser (one in a private window)
+- [x] Deleting a loaned book shows the API's error message
+- [x] Log out sends the user to the login page, and Books then asks for a login
 
 Later questions:
 - [x] Can a user loan several books?
@@ -160,6 +179,12 @@ Later questions:
 - Decision (assignment 3): The JWT secret is in appsettings.json (the assignment asks for it)
 - Decision (assignment 3): Scalar stays as the API reference, also for the token (already used in the project)
 - Decision (assignment 3): Docker stays as it is, and no CI (not part of this assignment)
+- Decision (frontend): Blazor Web App with Interactive Server, added after the API was complete. The server calls the API, so the API needs no CORS, and the frontend never touches the database
+- Decision (frontend): The pages only know IBooksClient and IAuthClient, so the tests use fakes and need no API
+- Decision (frontend): The pages show only the buttons the user's role may use. The API still checks the role, so a wrong role gives 403 anyway
+- Decision (frontend): The frontend runs in Docker Compose on port 5100, and finds the API on its service name (http://api:8080/). It does not go through Traefik
+- Limitation (frontend): The token is kept only while the tab is open. Reloading the page or an expired token (one hour) logs the user out
+- Limitation (frontend): The menu shows every link to everyone, because the layout is not interactive. A page the user may not use explains why, or sends them to log in
 
 - Limitation: An unknown id gives 409 Conflict on loan, return and delete (no separate unknown id handling in the MVP, because the user picks a book from the list)
 - Limitation: An empty title or author is accepted

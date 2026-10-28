@@ -1,6 +1,6 @@
 # BookKeeper
 
-BookKeeper is a small library system. Users register and log in with a JWT, and have one of two roles: the librarian adds and deletes books and sees every book, and library users see the available books, loan them, see their own loans and return them. Each loan is tied to the user who made it, so a user only sees and returns their own loans. The domain logic and the API contract were both built with test-driven development (red, green, refactor). The API stores the books in PostgreSQL through EF Core, and the whole system runs with Docker Compose.
+BookKeeper is a small library system. Users register and log in with a JWT, and have one of two roles: the librarian adds and deletes books and sees every book, and library users see the available books, loan them, see their own loans and return them. Each loan is tied to the user who made it, so a user only sees and returns their own loans. The domain logic and the API contract were both built with test-driven development (red, green, refactor). The API stores the books in PostgreSQL through EF Core, a Blazor frontend lets users do the whole flow in the browser, and the whole system runs with Docker Compose.
 
 ## Requirements
 
@@ -15,11 +15,12 @@ From the repository root:
 dotnet test
 ```
 
-This runs 38 tests:
+This runs 61 tests:
 - 12 domain tests for `BookService` (`BookKeeper.Tests/Domain`)
 - 26 API contract tests, one for each line in `Documentation/api.md`: 18 for `/books` and 8 for `/auth` (`BookKeeper.Tests/Api`)
+- 23 frontend tests for the pages and the API client (`BookKeeper.Web.Tests`)
 
-The tests use `FakeBookRepository` and `FakeUserRepository`, so they do not need Docker or a database. The API tests register and log in through the API, and send the token like a real client.
+The tests use `FakeBookRepository` and `FakeUserRepository`, so they do not need Docker or a database. The API tests register and log in through the API, and send the token like a real client. The frontend tests render the pages with bUnit and a fake API client, so they do not need the API.
 
 ## Run with Docker Compose
 
@@ -29,10 +30,11 @@ Start Docker Desktop, and run from the repository root:
 docker compose up --build -d
 ```
 
-This starts four services: the API, PostgreSQL, pgAdmin and Traefik. The API creates the tables itself when it starts (EF Core migrations).
+This starts five services: the API, the Blazor frontend, PostgreSQL, pgAdmin and Traefik. The API creates the tables itself when it starts (EF Core migrations).
 
 | Service | Address |
 |---|---|
+| Frontend | `http://localhost:5100` |
 | API | `http://localhost:8080/books` |
 | API through Traefik (ingress) | `http://localhost/books` |
 | Scalar | `http://localhost:8080/scalar` |
@@ -104,6 +106,23 @@ There are two roles. One librarian adds and deletes books. Library users loan an
 
 Without a valid token, the book endpoints answer `401 Unauthorized`. With the wrong role, they answer `403 Forbidden`. The token is valid for one hour. `GET /auth/me` shows the claims in your token.
 
+## Use the frontend
+
+The frontend is a Blazor app (`BookKeeper.Web`). It only talks to the API over HTTP, like Scalar and the `.http` file do.
+
+- With Docker Compose: `docker compose up --build -d`, and open `http://localhost:5100`.
+- Without Docker: start the API, then `dotnet run --project BookKeeper.Web`, and open the address in the log (`http://localhost:5020`). The frontend finds the API through `ApiBaseUrl` in `BookKeeper.Web/appsettings.Development.json`.
+
+The flow in the browser:
+
+1. **Register** (`/register`): choose a username, a password and a role. Only one librarian can be registered.
+2. **Log in** (`/login`). You come to **Books**.
+3. As the librarian: add a book with the form, and delete books. A loaned book is marked **Loaned**, and deleting it shows the API's error message.
+4. As a library user: loan a book from **Books**, see it in **My loans**, and return it there.
+5. **Log out** in the menu. To be two users at the same time, use a normal window for one and a private window for the other.
+
+The login lasts while the tab is open. Reloading the page (F5) logs you out, and so does an expired token (after one hour).
+
 ## Test the API manually
 
 There are two ways to test the API by hand. Both send real HTTP requests to the running API.
@@ -116,6 +135,8 @@ Open `http://localhost:8080/scalar` in a browser while the API runs in Docker Co
 2. Paste the token under **Authentication** at the top of the page. Scalar sends it with every request.
 3. As the librarian, send `POST /books` with a title and an author in the body, and copy the `id` from the response.
 4. Paste it as `bookId` in loan and return (as a library user) and delete (as the librarian). Log in again and paste the other token to switch user.
+
+If `GET /auth/me` still shows the previous user after you pasted a new token, Scalar is sending the old one. Reload the page with Ctrl+Shift+R, and paste the token again.
 
 ### REST Client
 
@@ -137,11 +158,15 @@ Open `BookKeeper.Api/BookKeeper.Api.http` in VS Code with the REST Client extens
 | `BookKeeper.Api/Dtos` | Request bodies: `RegisterRequest`, `LoginRequest` and `CreateBookRequest` |
 | `BookKeeper.Tests/Domain` | Domain tests |
 | `BookKeeper.Tests/Api` | API contract tests, `AuthHelper` (logs in a test user) and `BookKeeperFactory` (the API with the fakes) |
-| `docker-compose.yaml` | The API, PostgreSQL, pgAdmin and Traefik |
+| `BookKeeper.Web` | Blazor frontend: the pages (`Components/Pages`), the API clients and `TokenStore` (`Api/`), the style (`wwwroot/app.css`) and the `Dockerfile` |
+| `BookKeeper.Web.Tests` | Frontend tests with bUnit, the fake clients and `StubHandler` (a fake API for `BooksClient`) |
+| `docker-compose.yaml` | The API, the frontend, PostgreSQL, pgAdmin and Traefik |
 | `Excalidraw` | Sketch of the MVP flow (`flow.excalidraw` and `flow.png`) |
 | `Documentation` | Specification and API contract |
 
 `BookService` only depends on `IBookRepository`, and `AuthService` on `IUserRepository`. The API uses `EfBookRepository` and `EfUserRepository` (PostgreSQL), and the tests use `FakeBookRepository` and `FakeUserRepository` (memory). The controllers read the user id from the token and pass it to `BookService`, which passes it to the repository.
+
+The frontend pages only know `IBooksClient` and `IAuthClient`. In the app they are `BooksClient` and `AuthClient`, which call the API with the token from `TokenStore`, and in the tests they are `FakeBooksClient` and `FakeAuthClient`.
 
 ## Documentation
 

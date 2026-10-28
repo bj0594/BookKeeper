@@ -70,6 +70,18 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
 
+  # The Blazor frontend on http://localhost:5100. Calls the API on its service name, not on localhost.
+  web:
+    build:
+      context: .
+      dockerfile: BookKeeper.Web/Dockerfile
+    environment:
+      ApiBaseUrl: http://api:8080/
+    ports:
+      - "5100:8080"
+    depends_on:
+      - api
+
 volumes:
   db_data:
 

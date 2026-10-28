@@ -1,0 +1,9 @@
+# Keeps build output and local files out of the Docker build context, so the images build from the source only.
+bin/
+obj/
+**/bin/
+**/obj/
+.git/
+.vs/
+.vscode/
+*.user
