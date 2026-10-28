@@ -54,7 +54,7 @@ public class LoansPageTests : BunitContext
         var navigation = Services.GetRequiredService<NavigationManager>();
 
         // Act
-        Render<BooksPage>();
+        Render<LoansPage>();
 
         // Assert
         Assert.EndsWith("/login", navigation.Uri);

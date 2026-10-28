@@ -128,7 +128,7 @@ Frontend:
 - [x] Loans page sends a return for one book
 - [x] Login page shows an error for a wrong password
 - [x] Books page sends a logged-out user to the login page
-- [ ] Loans page sends a logged-out user to the login page
+- [x] Loans page sends a logged-out user to the login page
 
 Later questions:
 - [x] Can a user loan several books?
