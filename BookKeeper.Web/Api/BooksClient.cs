@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Net.Http.Headers;
 
 namespace BookKeeper.Web.Api;
 
@@ -7,9 +8,13 @@ public class BooksClient : IBooksClient
 {
     private readonly HttpClient _http;
 
-    public BooksClient(HttpClient http)
+    public BooksClient(HttpClient http, TokenStore tokens)
     {
         _http = http;
+        if (tokens.Token is not null)
+        {
+            _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokens.Token);
+        }
     }
 
     public async Task<List<BookDto>> GetBooksAsync()

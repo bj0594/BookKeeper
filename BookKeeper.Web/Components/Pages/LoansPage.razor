@@ -1,5 +1,5 @@
 @page "/loans"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using BookKeeper.Web.Api
 @inject IBooksClient Client
 
