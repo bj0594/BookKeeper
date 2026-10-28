@@ -32,6 +32,16 @@ public class BooksClient : IBooksClient
     public async Task DeleteBookAsync(Guid id)
     {
         var response = await _http.DeleteAsync($"books/{id}");
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessAsync(response);
+    }
+
+    // Throws with the API's own message, so the page can show it.
+    private static async Task EnsureSuccessAsync(HttpResponseMessage response)
+    {
+        if (!response.IsSuccessStatusCode)
+        {
+            var message = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException(message.Trim('"'), null, response.StatusCode);
+        }
     }
 }

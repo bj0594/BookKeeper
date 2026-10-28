@@ -5,6 +5,11 @@
 
 <h1>Books</h1>
 
+@if (_error is not null)
+{
+    <p class="error">@_error</p>
+}
+
 <form @onsubmit="Add">
     <input id="title" @bind="_newTitle" placeholder="Title" />
     <input id="author" @bind="_newAuthor" placeholder="Author" />
@@ -27,6 +32,7 @@ else
 
 @code {
     private List<BookDto>? _items;
+    private string? _error;
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,7 +58,16 @@ else
 
     private async Task Delete(Guid id)
     {
-        await Client.DeleteBookAsync(id);
-        _items = await Client.GetBooksAsync();
+        try
+        {
+            _error = null;
+            await Client.DeleteBookAsync(id);
+            _items = await Client.GetBooksAsync();
+            
+        }
+        catch (HttpRequestException ex)
+        {
+            _error = ex.Message;
+        }
     }
 }
