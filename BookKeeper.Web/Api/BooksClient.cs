@@ -28,4 +28,6 @@ public class BooksClient : IBooksClient
         var response = await _http.PatchAsync($"books/{id}/loan", null);
         response.EnsureSuccessStatusCode();
     }
+
+    public Task DeleteBookAsync(Guid id) => throw new NotImplementedException();
 }

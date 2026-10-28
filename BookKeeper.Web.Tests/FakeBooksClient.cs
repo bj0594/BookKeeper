@@ -21,4 +21,12 @@ public class FakeBooksClient : IBooksClient
         LoanedIds.Add(id);
         return Task.CompletedTask;
     }
+
+    public List<Guid> DeletedIds { get; } = [];
+
+    public Task DeleteBookAsync(Guid id)
+    {
+        DeletedIds.Add(id);
+        return Task.CompletedTask;
+    }
 }
