@@ -65,6 +65,7 @@ else
     {
         try
         {
+            _error = null;
             await Client.AddBookAsync(_newTitle, _newAuthor);
             _newTitle = "";
             _newAuthor = "";
@@ -80,6 +81,7 @@ else
     {
         try
         {
+            _error = null;
             await Client.LoanBookAsync(id);
             _items = await Client.GetBooksAsync();
         }
