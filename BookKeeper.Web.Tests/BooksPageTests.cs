@@ -121,4 +121,21 @@ public class BooksPageTests : BunitContext
         Assert.EndsWith("/login", navigation.Uri);
         Assert.False(_tokens.IsLoggedIn);
     }
+
+    [Fact]
+    public void BooksPage_LoanAfterRejectedDelete_ClearsMessage()
+    {
+        // Arrange
+        _client.Items.Add(new BookDto(Guid.NewGuid(), "Dune", "Frank Herbert", false, null));
+        _client.Fail = new HttpRequestException("Book must be returned before deleting.");
+        var page = Render<BooksPage>();
+        page.Find("li button.delete").Click();
+        page.WaitForAssertion(() => Assert.NotEmpty(page.FindAll(".error")));
+
+        // Act
+        page.Find("li button.loan").Click();
+
+        // Assert
+        page.WaitForAssertion(() => Assert.Empty(page.FindAll(".error")));
+    }
 }
