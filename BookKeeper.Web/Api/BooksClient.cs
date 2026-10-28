@@ -29,5 +29,9 @@ public class BooksClient : IBooksClient
         response.EnsureSuccessStatusCode();
     }
 
-    public Task DeleteBookAsync(Guid id) => throw new NotImplementedException();
+    public async Task DeleteBookAsync(Guid id)
+    {
+        var response = await _http.DeleteAsync($"books/{id}");
+        response.EnsureSuccessStatusCode();
+    }
 }
