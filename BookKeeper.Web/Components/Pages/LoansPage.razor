@@ -14,7 +14,7 @@ else
     <ul>
         @foreach (var item in _items)
         {
-            <li>@item.Title by @item.Author</li>
+            <li>@item.Title by @item.Author <button class="return" @onclick="() => Return(item.Id)">Return</button></li>
         }
     </ul>
 }
@@ -24,6 +24,12 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        _items = await Client.GetLoansAsync();
+    }
+
+    private async Task Return(Guid id)
+    {
+        await Client.ReturnBookAsync(id);
         _items = await Client.GetLoansAsync();
     }
 }
