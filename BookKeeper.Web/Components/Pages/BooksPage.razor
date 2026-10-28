@@ -2,6 +2,8 @@
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using BookKeeper.Web.Api
 @inject IBooksClient Client
+@inject TokenStore Tokens
+@inject NavigationManager Navigation
 
 <h1>Books</h1>
 
@@ -35,9 +37,15 @@ else
     private string? _error;
 
     protected override async Task OnInitializedAsync()
+{
+    if (!Tokens.IsLoggedIn)
     {
-        _items = await Client.GetBooksAsync();
+        Navigation.NavigateTo("/login");
+        return;
     }
+
+    _items = await Client.GetBooksAsync();
+}
 
     private string _newTitle = "";
     private string _newAuthor = "";
