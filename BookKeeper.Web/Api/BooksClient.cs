@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Net.Http.Headers;
+using System.Net;
 
 namespace BookKeeper.Web.Api;
 
@@ -40,13 +41,20 @@ public class BooksClient : IBooksClient
         await EnsureSuccessAsync(response);
     }
 
-    // Throws with the API's own message, so the page can show it.
+    // Throws with the API's own message, so the page can show it. Some answers (403) have no text, so they get one here.
     private static async Task EnsureSuccessAsync(HttpResponseMessage response)
     {
         if (!response.IsSuccessStatusCode)
         {
-            var message = await response.Content.ReadAsStringAsync();
-            throw new HttpRequestException(message.Trim('"'), null, response.StatusCode);
+            var message = (await response.Content.ReadAsStringAsync()).Trim('"');
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                message = response.StatusCode == HttpStatusCode.Forbidden
+                    ? "You are not allowed to do that."
+                    : $"The request failed ({(int)response.StatusCode}).";
+            }
+
+            throw new HttpRequestException(message, null, response.StatusCode);
         }
     }
 
