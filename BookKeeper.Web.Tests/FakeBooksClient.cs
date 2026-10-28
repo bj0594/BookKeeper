@@ -31,4 +31,8 @@ public class FakeBooksClient : IBooksClient
         DeletedIds.Add(id);
         return Task.CompletedTask;
     }
+
+    public List<BookDto> Loans { get; } = [];
+
+    public Task<List<BookDto>> GetLoansAsync() => Task.FromResult(Loans);
 }

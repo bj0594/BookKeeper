@@ -44,4 +44,6 @@ public class BooksClient : IBooksClient
             throw new HttpRequestException(message.Trim('"'), null, response.StatusCode);
         }
     }
+
+    public Task<List<BookDto>> GetLoansAsync() => throw new NotImplementedException();
 }
