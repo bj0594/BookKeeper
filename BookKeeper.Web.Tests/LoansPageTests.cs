@@ -88,4 +88,19 @@ public class LoansPageTests : BunitContext
         // Assert
         Assert.Contains("You are not allowed to do that.", page.Find(".error").TextContent);
     }
+
+    [Fact]
+    public void LoansPage_TokenExpired_GoesToLogin()
+    {
+        // Arrange
+        _client.LoadFail = new HttpRequestException("", null, HttpStatusCode.Unauthorized);
+        var navigation = Services.GetRequiredService<NavigationManager>();
+
+        // Act
+        Render<LoansPage>();
+
+        // Assert
+        Assert.EndsWith("/login", navigation.Uri);
+        Assert.False(_tokens.IsLoggedIn);
+    }
 }
