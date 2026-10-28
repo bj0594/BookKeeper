@@ -73,4 +73,19 @@ public class BooksPageTests : BunitContext
         // Assert
         page.WaitForAssertion(() => Assert.Contains(book.Id, _client.DeletedIds));
     }
+
+    [Fact]
+    public void BooksPage_DeleteRejected_ShowsMessage()
+    {
+        // Arrange
+        _client.Items.Add(new BookDto(Guid.NewGuid(), "Dune", "Frank Herbert", true, Guid.NewGuid()));
+        _client.Fail = new HttpRequestException("Book must be returned before deleting.");
+        var page = Render<BooksPage>();
+
+        // Act
+        page.Find("li button.delete").Click();
+
+        // Assert
+        page.WaitForAssertion(() => Assert.Contains("Book must be returned before deleting.", page.Find(".error").TextContent));
+    }
 }

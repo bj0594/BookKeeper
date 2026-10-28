@@ -5,6 +5,7 @@ namespace BookKeeper.Web.Tests;
 // Answers like the API, without HTTP. The tests fill Items with the books the page should get.
 public class FakeBooksClient : IBooksClient
 {
+    public Exception? Fail { get; set; }
     public List<BookDto> Items { get; } = [];
 
     public Task<List<BookDto>> GetBooksAsync() => Task.FromResult(Items);
@@ -26,6 +27,7 @@ public class FakeBooksClient : IBooksClient
 
     public Task DeleteBookAsync(Guid id)
     {
+        if (Fail is not null) throw Fail;
         DeletedIds.Add(id);
         return Task.CompletedTask;
     }
