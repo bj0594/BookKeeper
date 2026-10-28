@@ -7,8 +7,8 @@
 <h1>Log in</h1>
 
 <form @onsubmit="LogIn">
-    <input id="username" @bind="_username" placeholder="Username" />
-    <input id="password" @bind="_password" type="password" placeholder="Password" />
+    <input id="username" @bind="_username" placeholder="Username" required />
+    <input id="password" @bind="_password" type="password" placeholder="Password" required />
     <button type="submit">Log in</button>
 </form>
 
@@ -16,6 +16,8 @@
 {
     <p class="error">Wrong username or password.</p>
 }
+
+<p>No account yet? <a href="register">Register</a></p>
 
 @code {
     private string _username = "";

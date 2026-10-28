@@ -1,4 +1,5 @@
 using Bunit;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using BookKeeper.Web.Api;
 using BookKeeper.Web.Components.Pages;
@@ -27,5 +28,20 @@ public class LoginPageTests : BunitContext
 
         // Assert
         page.WaitForAssertion(() => Assert.NotNull(page.Find(".error")));
+    }
+
+    [Fact]
+    public void LoginPage_ValidLogin_GoesToBooks()
+    {
+        // Arrange
+        _auth.Succeeds = true;
+        var navigation = Services.GetRequiredService<NavigationManager>();
+        var page = Render<LoginPage>();
+
+        // Act
+        page.Find("form").Submit();
+
+        // Assert
+        page.WaitForAssertion(() => Assert.EndsWith("/books", navigation.Uri));
     }
 }
