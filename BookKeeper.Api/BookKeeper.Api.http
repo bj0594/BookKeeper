@@ -1,20 +1,41 @@
 # http://localhost:8080 with Docker Compose, http://localhost:5135 with dotnet run
 @host = http://localhost:8080
 
-### Register librarian
+# Send the requests from top to bottom. A request with {{librarian...}}, {{user...}}, {{user2...}} or {{addBook...}}
+# needs the request with that # @name to be sent first. Register gives 409 the second time you run the file, and login still works.
+
+### Register librarian (201)
 POST {{host}}/auth/register
 Content-Type: application/json
 
 { "username": "librarian", "password": "Test-password-1", "role": "Librarian" }
 
-### Log in librarian
+### Register a second librarian (409, only one librarian)
+POST {{host}}/auth/register
+Content-Type: application/json
+
+{ "username": "librarian2", "password": "Test-password-1", "role": "Librarian" }
+
+### Register with an unknown role (400)
+POST {{host}}/auth/register
+Content-Type: application/json
+
+{ "username": "admin", "password": "Test-password-1", "role": "Admin" }
+
+### Log in librarian (200 + token)
 # @name librarian
 POST {{host}}/auth/login
 Content-Type: application/json
 
 { "username": "librarian", "password": "Test-password-1" }
 
-### Register user
+### Log in with the wrong password (401)
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{ "username": "librarian", "password": "Wrong-password" }
+
+### Register user (201)
 POST {{host}}/auth/register
 Content-Type: application/json
 
@@ -27,11 +48,27 @@ Content-Type: application/json
 
 { "username": "user", "password": "Test-password-1" }
 
+### Register user2 (201)
+POST {{host}}/auth/register
+Content-Type: application/json
+
+{ "username": "user2", "password": "Test-password-1", "role": "LibraryUser" }
+
+### Log in user2
+# @name user2
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{ "username": "user2", "password": "Test-password-1" }
+
 ### Who am I (user)
 GET {{host}}/auth/me
 Authorization: Bearer {{user.response.body.$.token}}
 
-### Add a book (librarian)
+### List books without a token (401)
+GET {{host}}/books
+
+### Add a book (librarian, 201)
 # @name addBook
 POST {{host}}/books
 Authorization: Bearer {{librarian.response.body.$.token}}
@@ -39,22 +76,68 @@ Content-Type: application/json
 
 { "title": "Dune", "author": "Frank Herbert" }
 
-### List books (user)
+### Add a book as a library user (403)
+POST {{host}}/books
+Authorization: Bearer {{user.response.body.$.token}}
+Content-Type: application/json
+
+{ "title": "Dune", "author": "Frank Herbert" }
+
+### List books (user, only available books)
 GET {{host}}/books
 Authorization: Bearer {{user.response.body.$.token}}
 
-### Loan the book (user)
+### Loan the book (user, 204)
 PATCH {{host}}/books/{{addBook.response.body.$.id}}/loan
 Authorization: Bearer {{user.response.body.$.token}}
 
-### My loans (user)
+### Loan the same book again (409)
+PATCH {{host}}/books/{{addBook.response.body.$.id}}/loan
+Authorization: Bearer {{user.response.body.$.token}}
+
+### Loan as the librarian (403)
+PATCH {{host}}/books/{{addBook.response.body.$.id}}/loan
+Authorization: Bearer {{librarian.response.body.$.token}}
+
+### My loans (user, the book is there)
 GET {{host}}/books/loans
 Authorization: Bearer {{user.response.body.$.token}}
 
-### Return the book (user)
+### My loans (user2, empty)
+GET {{host}}/books/loans
+Authorization: Bearer {{user2.response.body.$.token}}
+
+### My loans as the librarian (403)
+GET {{host}}/books/loans
+Authorization: Bearer {{librarian.response.body.$.token}}
+
+### List books (librarian, the loaned book is there)
+GET {{host}}/books
+Authorization: Bearer {{librarian.response.body.$.token}}
+
+### Return another user's loan (user2, 403)
+PATCH {{host}}/books/{{addBook.response.body.$.id}}/return
+Authorization: Bearer {{user2.response.body.$.token}}
+
+### Delete a loaned book (librarian, 409)
+DELETE {{host}}/books/{{addBook.response.body.$.id}}
+Authorization: Bearer {{librarian.response.body.$.token}}
+
+### Return the book (user, 204)
 PATCH {{host}}/books/{{addBook.response.body.$.id}}/return
 Authorization: Bearer {{user.response.body.$.token}}
 
-### Delete the book (librarian)
+### Return a book that is not loaned (409)
+PATCH {{host}}/books/{{addBook.response.body.$.id}}/return
+Authorization: Bearer {{user.response.body.$.token}}
+
+### Delete as a library user (403)
+DELETE {{host}}/books/{{addBook.response.body.$.id}}
+Authorization: Bearer {{user.response.body.$.token}}
+
+### Delete the book (librarian, 204)
 DELETE {{host}}/books/{{addBook.response.body.$.id}}
 Authorization: Bearer {{librarian.response.body.$.token}}
+
+### Health check (200 Healthy)
+GET {{host}}/health
