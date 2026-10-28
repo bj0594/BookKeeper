@@ -120,12 +120,13 @@ Manual checks (assignment 3, against the API in Docker Compose with BookKeeper.A
 
 Frontend:
 - [x] Books page shows the list from the API
-- [ ] Books page sends a new book to the API
-- [ ] Books page sends a loan for one book
-- [ ] Books page sends a delete for one book
-- [ ] Books page shows the error message from the API
-- [ ] Loans page shows the user's own loans
-- [ ] Loans page sends a return for one book
+- [x] Books page sends a new book to the API
+- [x] Books page sends a loan for one book
+- [x] Books page sends a delete for one book
+- [x] Books page shows the error message from the API
+- [x] Loans page shows the user's own loans
+- [x] Loans page sends a return for one book
+- [ ] Login page shows an error for a wrong password
 
 Later questions:
 - [x] Can a user loan several books?
