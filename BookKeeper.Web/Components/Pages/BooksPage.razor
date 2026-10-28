@@ -5,6 +5,12 @@
 
 <h1>Books</h1>
 
+<form @onsubmit="Add">
+    <input id="title" @bind="_newTitle" placeholder="Title" />
+    <input id="author" @bind="_newAuthor" placeholder="Author" />
+    <button type="submit">Add</button>
+</form>
+
 @if (_items is null)
 {
     <p>Loading…</p>
@@ -24,6 +30,17 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        _items = await Client.GetBooksAsync();
+    }
+
+    private string _newTitle = "";
+    private string _newAuthor = "";
+
+    private async Task Add()
+    {
+        await Client.AddBookAsync(_newTitle, _newAuthor);
+        _newTitle = "";
+        _newAuthor = "";
         _items = await Client.GetBooksAsync();
     }
 }
