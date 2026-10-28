@@ -1,7 +1,7 @@
 @page "/loans"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Net
 @using BookKeeper.Web.Api
-@using System.Net;
 @inject IBooksClient Client
 @inject TokenStore Tokens
 @inject NavigationManager Navigation
@@ -17,12 +17,19 @@
 {
     <p>Loading…</p>
 }
+else if (_items.Count == 0 && _error is null)
+{
+    <p>You have no loans. Loan a book on the <a href="books">Books</a> page.</p>
+}
 else
 {
     <ul>
         @foreach (var item in _items)
         {
-            <li>@item.Title by @item.Author <button class="return" @onclick="() => Return(item.Id)">Return</button></li>
+            <li>
+                <span>@item.Title by @item.Author</span>
+                <button class="return" @onclick="() => Return(item.Id)">Return</button>
+            </li>
         }
     </ul>
 }
@@ -43,12 +50,10 @@ else
         {
             _items = await Client.GetLoansAsync();
         }
-
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
         {
             // The token has expired: log out, and let the user log in again.
-            Tokens.Token = null;
-            Tokens.Role = null;
+            Tokens.LogOut();
             Navigation.NavigateTo("/login");
         }
         catch (HttpRequestException ex)
