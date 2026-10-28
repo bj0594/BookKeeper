@@ -2,6 +2,8 @@
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using BookKeeper.Web.Api
 @inject IBooksClient Client
+@inject TokenStore Tokens
+@inject NavigationManager Navigation
 
 <h1>My loans</h1>
 
@@ -23,9 +25,15 @@ else
     private List<BookDto>? _items;
 
     protected override async Task OnInitializedAsync()
+{
+    if (!Tokens.IsLoggedIn)
     {
-        _items = await Client.GetLoansAsync();
+        Navigation.NavigateTo("/login");
+        return;
     }
+
+    _items = await Client.GetLoansAsync();
+}
 
     private async Task Return(Guid id)
     {

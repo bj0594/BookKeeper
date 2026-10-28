@@ -11,10 +11,10 @@ public class LoansPageTests : BunitContext
 {
     private readonly FakeBooksClient _client = new();
     private readonly TokenStore _tokens = new() { Token = "test" };
-
     public LoansPageTests()
     {
         Services.AddSingleton<IBooksClient>(_client);
+        Services.AddSingleton(_tokens);
     }
 
     [Fact]
