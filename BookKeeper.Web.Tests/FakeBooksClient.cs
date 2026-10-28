@@ -40,6 +40,7 @@ public class FakeBooksClient : IBooksClient
 
     public Task ReturnBookAsync(Guid id)
     {
+        if (Fail is not null) throw Fail;
         ReturnedIds.Add(id);
         return Task.CompletedTask;
     }

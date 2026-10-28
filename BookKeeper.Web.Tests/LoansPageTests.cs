@@ -59,4 +59,19 @@ public class LoansPageTests : BunitContext
         // Assert
         Assert.EndsWith("/login", navigation.Uri);
     }
+
+    [Fact]
+    public void LoansPage_ReturnRejected_ShowsMessage()
+    {
+        // Arrange
+        _client.Loans.Add(new BookDto(Guid.NewGuid(), "Dune", "Frank Herbert", true, Guid.NewGuid()));
+        _client.Fail = new HttpRequestException("Book is loaned by another user.");
+        var page = Render<LoansPage>();
+
+        // Act
+        page.Find("li button.return").Click();
+
+        // Assert
+        page.WaitForAssertion(() => Assert.Contains("Book is loaned by another user.", page.Find(".error").TextContent));
+    }
 }
