@@ -20,7 +20,7 @@ else
     <ul>
         @foreach (var item in _items)
         {
-            <li>@item.Title by @item.Author</li>
+            <li>@item.Title by @item.Author <button class="loan" @onclick="() => Loan(item.Id)">Loan</button></li>
         }
     </ul>
 }
@@ -41,6 +41,12 @@ else
         await Client.AddBookAsync(_newTitle, _newAuthor);
         _newTitle = "";
         _newAuthor = "";
+        _items = await Client.GetBooksAsync();
+    }
+
+    private async Task Loan(Guid id)
+    {
+        await Client.LoanBookAsync(id);
         _items = await Client.GetBooksAsync();
     }
 }

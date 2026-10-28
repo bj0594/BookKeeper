@@ -23,5 +23,9 @@ public class BooksClient : IBooksClient
         response.EnsureSuccessStatusCode();
     }
 
-    public Task LoanBookAsync(Guid id) => throw new NotImplementedException();
+    public async Task LoanBookAsync(Guid id)
+    {
+        var response = await _http.PatchAsync($"books/{id}/loan", null);
+        response.EnsureSuccessStatusCode();
+    }
 }
