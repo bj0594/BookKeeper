@@ -43,4 +43,5 @@ flowchart LR
     classDef client fill:#e8f0fe,stroke:#4a6fa5,color:#1a1a1a
     classDef storage fill:#fff4e0,stroke:#b07d2b,color:#1a1a1a
     class browser,restclient client
-    class db,vol storage```
+    class db,vol storage
+```

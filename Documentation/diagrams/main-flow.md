@@ -42,4 +42,5 @@ flowchart TD
     returned --> myLoans
 
     librarianAction -- Log out --> loggedOut([Logged out])
-    userAction -- Log out --> loggedOut```
+    userAction -- Log out --> loggedOut
+```
