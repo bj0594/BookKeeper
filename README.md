@@ -168,6 +168,50 @@ Open `BookKeeper.Api/BookKeeper.Api.http` in VS Code with the REST Client extens
 
 The frontend pages only know `IBooksClient` and `IAuthClient`. In the app they are `BooksClient` and `AuthClient`, which call the API with the token from `TokenStore`, and in the tests they are `FakeBooksClient` and `FakeAuthClient`.
 
+## Architecture review
+
+A review of BookKeeper as it is at the end of module 3: how the system is built, and what could be better. The decision for the first weakness is in the [ADR](Documentation/adr.md).
+
+### How the system works today
+
+The diagrams: [architecture](Documentation/diagrams/architecture.md), [login and token](Documentation/diagrams/login-and-token.md), [main flow](Documentation/diagrams/main-flow.md) and [data](Documentation/diagrams/data.md).
+
+- **Where the components run.** Everything runs in Docker Compose on one machine (`docker-compose.yaml`): `traefik` (ingress), `web` (Blazor Server), `api` (ASP.NET Core), `db` (PostgreSQL 17) and `pgadmin`. Without Docker, the API and the frontend can run with `dotnet run`, with the database still in Docker.
+- **How they communicate.** The browser talks to `web` over HTTP and a WebSocket (SignalR). `web` calls `api` over HTTP on its service name, `http://api:8080/`. Traefik sends every request on `localhost:80` to `api`. `api` reaches `db` through EF Core and Npgsql on `db:5432`, and so does pgAdmin. Scalar and the REST Client file call `api` directly on `localhost:8080`.
+- **Where data is stored.** The books and users are in the tables `Books` and `Users` in PostgreSQL, in the volume `db_data`, so they survive restarts and `docker compose down`. Passwords are stored only as BCrypt hashes. The token is kept in `web`, in memory, once per browser tab (`TokenStore`).
+- **How the user is identified.** Login checks the password with BCrypt and returns a JWT signed with `Jwt:Key` (HMAC-SHA256), with the claims `sub` (user id), `unique_name` and `role`, valid for one hour. Every later request sends it as `Authorization: Bearer <token>`. The API checks the signature, issuer, audience and expiry, reads the user id from `sub`, and the role decides what `[Authorize(Roles = …)]` allows.
+- **What depends on what.** `web` depends on `api`, and knows nothing about `BookKeeper.Core` or the database. `api` depends on `db`: it starts when `db` is healthy, and `/health` is `Unhealthy` when it can't reach it. Inside the API, `BookKeeper.Api` uses `BookKeeper.Core`, and `BookKeeper.Infrastructure` implements the repository interfaces from Core, so Core depends on nothing. Traefik depends on the Docker Engine, because it reads the labels through `docker.sock`.
+
+### Weaknesses
+
+**1. The JWT signing key is in the repository**
+
+- **Problem:** `Jwt:Key` is in `BookKeeper.Api/appsettings.json`, and has been in the public repository since it was added.
+- **Consequence:** Anyone who reads the repository can sign their own token with any user id and the role `Librarian`, and gets full access. Changing the file is not enough, because the key stays in the git history.
+- **Solution:** Read the key from an environment variable that is not committed (`.env` for Docker Compose, user-secrets for `dotnet run`), create a new key, and stop the API at startup if the key is missing. See the [ADR](Documentation/adr.md).
+- **Priority:** High. It breaks the login for the whole system, and the fix is small.
+
+**2. Anyone can become the librarian**
+
+- **Problem:** The role is chosen at registration (`RegisterRequest.Role`), and the first user who chooses `Librarian` gets it (`AuthService.Register`).
+- **Consequence:** In a new environment, or after `docker compose down -v`, whoever registers first controls the library. The rule "only one librarian" protects the role from the second person, not the first.
+- **Solution:** Registration always gives `LibraryUser`. The librarian is created when the API starts, from settings that are not in the repository.
+- **Priority:** High. It is the same kind of problem as weakness 1: the most powerful role is open to anyone who comes first.
+
+**3. Many ways in, and the ingress is only used for the API**
+
+- **Problem:** Traefik routes `localhost:80` to the API, but the frontend has its own port (`5100`), and the API (`8080`), PostgreSQL (`5432`), pgAdmin (`5050`) and the Traefik dashboard (`8081`, with `--api.insecure=true`) are all open on the machine.
+- **Consequence:** There is no single place that controls the traffic, so rules like HTTPS or rate limiting would have to be added in several places. The database and the dashboard are reachable from outside the Docker network.
+- **Solution:** One entry: Traefik with a rule per host (`web.localhost` and `api.localhost`), no published ports on `api` and `db`, and the dashboard turned off or protected.
+- **Priority:** Medium. It matters as soon as the system runs anywhere but on a developer's machine.
+
+**4. No HTTPS**
+
+- **Problem:** All traffic is plain HTTP. Both `Program.cs` files call `UseHttpsRedirection()`, but the containers have no HTTPS port, so it does nothing.
+- **Consequence:** Passwords and tokens are sent in clear text, and anyone on the same network can read them and reuse the token.
+- **Solution:** TLS in Traefik: a self-signed certificate locally, and Let's Encrypt when the system has a real domain. The services behind Traefik can stay on HTTP inside the Docker network.
+- **Priority:** Medium locally, high in production. It builds on weakness 3, because one entry point is the natural place for TLS.
+
 ## Documentation
 
 - [Specification](Documentation/Specification.md): requirements, flow, interface, test list, decisions and limitations
