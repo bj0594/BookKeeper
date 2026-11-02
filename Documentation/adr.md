@@ -34,5 +34,5 @@ Alternative A. The JWT key and the database passwords are read from environment 
 - The new key makes every existing token invalid, so everyone has to log in again.
 - The old key is still in the git history, but it is worthless now that the API doesn't use it. The history is not rewritten.
 - `docker compose up` stops with an error if `.env` is missing. The README explains how to copy `.env.example` to `.env`.
-- The tests get the key from `BookKeeperFactory` (`builder.UseSetting("Jwt:Key", …)`), not from `appsettings.json`.
+- The tests get the key from `BookKeeperFactory` (`ConfigureAppConfiguration` with `AddInMemoryCollection`), not from `appsettings.json`.
 - Anyone with access to the machine can still read the secrets with `docker inspect`. That is accepted for now, and is the reason to move to B before deploying to a server.

@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Options;
 
 namespace BookKeeper.Api.Auth;
 
@@ -12,13 +13,13 @@ public class AuthService
 {
     private readonly IUserRepository _users;
     private readonly PasswordHasher _hasher;
-    private readonly IConfiguration _config;
+    private readonly JwtOptions _jwt;
 
-    public AuthService(IUserRepository users, PasswordHasher hasher, IConfiguration config)
+    public AuthService(IUserRepository users, PasswordHasher hasher, IOptions<JwtOptions> jwtOptions)
     {
         _users = users;
         _hasher = hasher;
-        _config = config;
+        _jwt = jwtOptions.Value;
     }
 
     // Throws InvalidOperationException if the username is taken or the role rule is broken, and ArgumentException if the role is unknown.
@@ -59,7 +60,7 @@ public class AuthService
     // Creates the JWT a user gets after logging in. Uses the same Jwt settings as the check in Program.cs.
     private string CreateToken(User user)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key!));
 
         var descriptor = new SecurityTokenDescriptor
         {
@@ -69,8 +70,8 @@ public class AuthService
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
                 new Claim("role", user.Role)
             ]),
-            Issuer = _config["Jwt:Issuer"],
-            Audience = _config["Jwt:Audience"],
+            Issuer = _jwt.Issuer,
+            Audience = _jwt.Audience,
             Expires = DateTime.UtcNow.AddHours(1),
             SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
         };
