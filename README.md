@@ -15,16 +15,19 @@ From the repository root:
 dotnet test
 ```
 
-This runs 61 tests:
+This runs 62 tests:
 - 12 domain tests for `BookService` (`BookKeeper.Tests/Domain`)
 - 26 API contract tests, one for each line in `Documentation/api.md`: 18 for `/books` and 8 for `/auth` (`BookKeeper.Tests/Api`)
+- 1 startup test that checks that the API refuses to start without a valid JWT key (`BookKeeper.Tests/Api/StartupTests.cs`)
 - 23 frontend tests for the pages and the API client (`BookKeeper.Web.Tests`)
 
-The tests use `FakeBookRepository` and `FakeUserRepository`, so they do not need Docker or a database. The API tests register and log in through the API, and send the token like a real client. The frontend tests render the pages with bUnit and a fake API client, so they do not need the API.
+The tests use `FakeBookRepository` and `FakeUserRepository`, so they do not need Docker or a database. `BookKeeperFactory` gives the API a test JWT key, so the tests need no `.env` or user-secrets either. The API tests register and log in through the API, and send the token like a real client. The frontend tests render the pages with bUnit and a fake API client, so they do not need the API.
 
 ## Run with Docker Compose
 
-Start Docker Desktop, and run from the repository root:
+Start Docker Desktop. From the repository root, copy `.env.example` to `.env`, and fill in the values: a JWT key of at least 32 random characters, the database password and the pgAdmin password. `.env` is not committed. Without it, `docker compose up` stops and names the value that is missing.
+
+Then run:
 
 ```bash
 docker compose up --build -d
@@ -52,9 +55,9 @@ docker compose ps
 
 ### View the data in pgAdmin
 
-1. Open `http://localhost:5050`, and log in with `bookkeeper@book.com` and `password`.
+1. Open `http://localhost:5050`, and log in with `bookkeeper@book.com` and `PGADMIN_PASSWORD` from `.env`.
 2. Right-click **Servers** → **Register** → **Server**. Give it any name under **General**.
-3. Under **Connection**: host `db`, port `5432`, maintenance database `bookkeeper`, username `bookkeeper`, password `password`.
+3. Under **Connection**: host `db`, port `5432`, maintenance database `bookkeeper`, username `bookkeeper`, password `POSTGRES_PASSWORD` from `.env`.
 4. Open **Servers** → your server → **Databases** → `bookkeeper` → **Schemas** → `public` → **Tables**.
 5. Right-click `Books` or `Users` → **View/Edit Data** → **All Rows**. `Users` stores only the BCrypt hash of each password, and `LoanedByUserId` in `Books` is the id of the user who has the book.
 
@@ -70,14 +73,16 @@ The books and the users are stored in PostgreSQL, in the Docker volume `db_data`
 | `docker compose down` | Removes the containers, keeps the data. pgAdmin forgets the registered server. |
 | `docker compose down -v` | Also deletes the volume, so all books and users are gone. |
 
+PostgreSQL reads `POSTGRES_PASSWORD` only when the database is created. If you change it in `.env` later, run `docker compose down -v` first, which deletes the data.
+
 ### Build and run the API image alone
 
 ```bash
 docker build -t bookkeeper-api -f BookKeeper.Api/Dockerfile .
-docker run --rm -p 8080:8080 bookkeeper-api
+docker run --rm -p 8080:8080 -e Jwt__Key=<JWT_KEY from .env> bookkeeper-api
 ```
 
-The `Dockerfile` is in `BookKeeper.Api/`, but the build runs from the repository root, because the API also needs `BookKeeper.Core` and `BookKeeper.Infrastructure`. This checks that the image builds and the API starts. Without a database, the endpoints do not work, so use Docker Compose for everything else.
+The `Dockerfile` is in `BookKeeper.Api/`, but the build runs from the repository root, because the API also needs `BookKeeper.Core` and `BookKeeper.Infrastructure`. The API stops at startup without `Jwt__Key`. This checks that the image builds and the API starts. Without a database, the endpoints do not work, so use Docker Compose for everything else.
 
 ## Run the API without Docker
 
@@ -85,13 +90,15 @@ The API needs PostgreSQL, so the database still runs in Docker. From the reposit
 
 ```bash
 docker compose up -d db
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=bookkeeper;Username=bookkeeper;Password=password" --project BookKeeper.Api
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=bookkeeper;Username=bookkeeper;Password=<POSTGRES_PASSWORD from .env>" --project BookKeeper.Api
+dotnet user-secrets set "Jwt:Key" "<JWT_KEY from .env>" --project BookKeeper.Api
 dotnet tool install --global dotnet-ef
 dotnet ef database update --project BookKeeper.Infrastructure --startup-project BookKeeper.Api -- --environment Development
 dotnet run --project BookKeeper.Api
 ```
 
 - The connection string uses `localhost` instead of `db`, because the API runs on your machine, outside the Docker network.
+- `Jwt:Key` is not in `appsettings.json`, so `dotnet run` reads it from user-secrets. Without it, the API stops at startup with `Jwt:Key is missing or shorter than 32 characters`.
 - `dotnet user-secrets set` and `dotnet tool install` are only needed once. `database update` is only needed when the tables do not exist yet, or after a new migration.
 
 The API runs on `http://localhost:5135`.
@@ -154,17 +161,18 @@ Open `BookKeeper.Api/BookKeeper.Api.http` in VS Code with the REST Client extens
 | `BookKeeper.Core` | Domain logic: `Book`, `BookService`, `User` and `Roles`, and the repository interfaces with their fakes (`Repository/`) |
 | `BookKeeper.Infrastructure` | Data access with EF Core: `BookKeeperDbContext`, `EfBookRepository`, `EfUserRepository` and the migrations (`Migrations/`) |
 | `BookKeeper.Api` | REST API: controllers, `Program.cs` and the `Dockerfile` |
-| `BookKeeper.Api/Auth` | Registration and login (`AuthService`), password hashing with BCrypt (`PasswordHasher`), and the token setup for Scalar |
+| `BookKeeper.Api/Auth` | Registration and login (`AuthService`), password hashing with BCrypt (`PasswordHasher`), the JWT settings checked at startup (`JwtOptions`), and the token setup for Scalar |
 | `BookKeeper.Api/Dtos` | Request bodies: `RegisterRequest`, `LoginRequest` and `CreateBookRequest` |
 | `BookKeeper.Tests/Domain` | Domain tests |
-| `BookKeeper.Tests/Api` | API contract tests, `AuthHelper` (logs in a test user) and `BookKeeperFactory` (the API with the fakes) |
+| `BookKeeper.Tests/Api` | API contract tests, the startup test, `AuthHelper` (logs in a test user) and `BookKeeperFactory` (the API with the fakes and a test JWT key) |
 | `BookKeeper.Web` | Blazor frontend: the pages (`Components/Pages`), the API clients and `TokenStore` (`Api/`), the style (`wwwroot/app.css`) and the `Dockerfile` |
 | `BookKeeper.Web.Tests` | Frontend tests with bUnit, the fake clients and `StubHandler` (a fake API for `BooksClient`) |
-| `docker-compose.yaml` | The API, the frontend, PostgreSQL, pgAdmin and Traefik |
+| `docker-compose.yaml` | The API, the frontend, PostgreSQL, pgAdmin and Traefik. The secrets come from `.env` |
+| `.env.example` | The values `.env` must have, without the secrets. Copy it to `.env` |
 | `Documentation/diagrams` | The diagrams in Mermaid: architecture, login and token, main flow, data |
-| `Documentation` | Specification and API contract |
+| `Documentation` | Specification, API contract and the architecture decision (ADR) |
 
-`BookService` only depends on `IBookRepository`, and `AuthService` on `IUserRepository`. The API uses `EfBookRepository` and `EfUserRepository` (PostgreSQL), and the tests use `FakeBookRepository` and `FakeUserRepository` (memory). The controllers read the user id from the token and pass it to `BookService`, which passes it to the repository.
+`BookService` only depends on `IBookRepository`, and `AuthService` on `IUserRepository` and `JwtOptions`. The API uses `EfBookRepository` and `EfUserRepository` (PostgreSQL), and the tests use `FakeBookRepository` and `FakeUserRepository` (memory). The controllers read the user id from the token and pass it to `BookService`, which passes it to the repository.
 
 The frontend pages only know `IBooksClient` and `IAuthClient`. In the app they are `BooksClient` and `AuthClient`, which call the API with the token from `TokenStore`, and in the tests they are `FakeBooksClient` and `FakeAuthClient`.
 
@@ -179,12 +187,12 @@ The diagrams: [architecture](Documentation/diagrams/architecture.md), [login and
 - **Where the components run.** Everything runs in Docker Compose on one machine (`docker-compose.yaml`): `traefik` (ingress), `web` (Blazor Server), `api` (ASP.NET Core), `db` (PostgreSQL 17) and `pgadmin`. Without Docker, the API and the frontend can run with `dotnet run`, with the database still in Docker.
 - **How they communicate.** The browser talks to `web` over HTTP and a WebSocket (SignalR). `web` calls `api` over HTTP on its service name, `http://api:8080/`. Traefik sends every request on `localhost:80` to `api`. `api` reaches `db` through EF Core and Npgsql on `db:5432`, and so does pgAdmin. Scalar and the REST Client file call `api` directly on `localhost:8080`.
 - **Where data is stored.** The books and users are in the tables `Books` and `Users` in PostgreSQL, in the volume `db_data`, so they survive restarts and `docker compose down`. Passwords are stored only as BCrypt hashes. The token is kept in `web`, in memory, once per browser tab (`TokenStore`).
-- **How the user is identified.** Login checks the password with BCrypt and returns a JWT signed with `Jwt:Key` (HMAC-SHA256), with the claims `sub` (user id), `unique_name` and `role`, valid for one hour. Every later request sends it as `Authorization: Bearer <token>`. The API checks the signature, issuer, audience and expiry, reads the user id from `sub`, and the role decides what `[Authorize(Roles = …)]` allows.
+- **How the user is identified.** Login checks the password with BCrypt and returns a JWT signed with `Jwt:Key` (HMAC-SHA256), with the claims `sub` (user id), `unique_name` and `role`, valid for one hour. The key comes from `.env` in Docker Compose and from user-secrets with `dotnet run`, never from the repository. Every later request sends the token as `Authorization: Bearer <token>`. The API checks the signature, issuer, audience and expiry, reads the user id from `sub`, and the role decides what `[Authorize(Roles = …)]` allows.
 - **What depends on what.** `web` depends on `api`, and knows nothing about `BookKeeper.Core` or the database. `api` depends on `db`: it starts when `db` is healthy, and `/health` is `Unhealthy` when it can't reach it. Inside the API, `BookKeeper.Api` uses `BookKeeper.Core`, and `BookKeeper.Infrastructure` implements the repository interfaces from Core, so Core depends on nothing. Traefik depends on the Docker Engine, because it reads the labels through `docker.sock`.
 
 ### Weaknesses
 
-**1. The JWT signing key is in the repository**
+**1. The JWT signing key is in the repository (fixed, see the ADR)**
 
 - **Problem:** `Jwt:Key` is in `BookKeeper.Api/appsettings.json`, and has been in the public repository since it was added.
 - **Consequence:** Anyone who reads the repository can sign their own token with any user id and the role `Librarian`, and gets full access. Changing the file is not enough, because the key stays in the git history.
@@ -216,6 +224,7 @@ The diagrams: [architecture](Documentation/diagrams/architecture.md), [login and
 
 - [Specification](Documentation/Specification.md): requirements, flow, interface, test list, decisions and limitations
 - [API contract](Documentation/api.md): endpoints, requests, responses and status codes
+- [Architecture decision](Documentation/adr.md): secrets in configuration, and why they are read from environment variables
 - [Architecture](Documentation/diagrams/architecture.md): the containers, the clients, ports and dependencies
 - [Login and token](Documentation/diagrams/login-and-token.md): how a user is identified
 - [Main flow](Documentation/diagrams/main-flow.md): what a librarian and a library user can do

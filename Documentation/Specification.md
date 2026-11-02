@@ -7,6 +7,7 @@ The domain logic is built with TDD and then made available through a REST API.
 Assignment 2: the API runs in Docker, stores the books in PostgreSQL through EF Core, and the whole system starts with Docker Compose (API, PostgreSQL, pgAdmin and Traefik), with a health check. No new functionality.
 Assignment 3: the API provides registration and login. It creates users, hashes and checks passwords, and returns a JWT after a successful login. The token identifies the user and their role, and limits what they can see and do.
 Frontend (optional, assignment 3): a Blazor app where the main flow can be done in the browser. It only talks to the API.
+Architecture review (module 3): the system is mapped in Mermaid diagrams, its weaknesses are reviewed in the README, and one improvement is made: the secrets are moved out of the repository, and the API refuses to start without a valid JWT key (see [the ADR](adr.md)).
 Delivered as a GitHub repo with tests and a README.
 
 ## 2 Requirements
@@ -57,6 +58,10 @@ Ownership rules (assignment 3):
 - A user only sees their own loans         ✔ GetLoans_TwoUsers_ReturnsOnlyOwn, GetBooksLoans_TwoUsers_ReturnsOnlyOwn
 - A user can't return another user's loan  ✔ ReturnBook_OtherUsersLoan_ThrowsUnauthorizedAccessException, PatchBooksReturn_LoanedByOtherUser_ReturnsForbidden
 
+Architecture review (module 3):
+- The API does not start without a valid JWT key   ✔ Startup_WithoutJwtKey_Fails
+- No secrets in the repository                      (manual check, see §5)
+
 ## 3 Flow
 [The main flow](diagrams/main-flow.md)
 
@@ -93,7 +98,8 @@ User: Id (Guid), Username (string, unique), PasswordHash (string), Role (Librari
 
 Dependencies:
 - BookService depends only on IBookRepository. EfBookRepository (BookKeeper.Infrastructure) stores the books in PostgreSQL and is used by the API. FakeBookRepository (BookKeeper.Core) keeps them in memory and is used by the tests.
-- AuthService depends only on IUserRepository. EfUserRepository stores the users in PostgreSQL and is used by the API. FakeUserRepository keeps them in memory and is used by the API tests.
+- AuthService depends on IUserRepository and JwtOptions. EfUserRepository stores the users in PostgreSQL and is used by the API. FakeUserRepository keeps them in memory and is used by the API tests.
+- The JWT settings come from JwtOptions (Jwt:Key, Jwt:Issuer, Jwt:Audience), which AuthService and the token check in Program.cs both read. Jwt:Key is not in appsettings.json: Docker Compose sets it from .env (Jwt__Key), dotnet run reads it from user-secrets, and the tests set it in BookKeeperFactory. The API stops at startup if the key is missing or shorter than 32 characters.
 - The tables in PostgreSQL: [data diagram](diagrams/data.md). The whole system: [architecture diagram](diagrams/architecture.md).
 
 ## 5 Test list
@@ -151,12 +157,12 @@ Manual checks (frontend, in the browser with Docker Compose on http://localhost:
 - [x] Log out sends the user to the login page, and Books then asks for a login
 
 Architecture review (module 3):
-- [ ] The API refuses to start without a valid JWT key
+- [x] The API refuses to start without a valid JWT key
 
 Manual checks (architecture review):
-- [ ] docker compose up stops with a message when .env is missing
-- [ ] A token signed with the old key gives 401
-- [ ] appsettings.json and docker-compose.yaml contain no secrets
+- [x] docker compose up stops with a message when .env is missing
+- [x] A token signed with the old key gives 401
+- [x] appsettings.json and docker-compose.yaml contain no secrets
 
 Later questions:
 - [x] Can a user loan several books?
@@ -178,7 +184,7 @@ Later questions:
 - Decision (assignment 2): The health check also checks the database connection, so `/health` is `Unhealthy` when the API cannot reach PostgreSQL
 - Decision (assignment 2): Traefik is the ingress. It routes all traffic on port 80 to the API
 - Clarified (assignment 2): The Dockerfile is in BookKeeper.Api/, and docker-compose.yaml is in the repository root, as in the instructor's example solution
-- Decision (assignment 2): The database and pgAdmin passwords are in docker-compose.yaml. They are only for local development
+- Decision (assignment 2): The database and pgAdmin passwords were in docker-compose.yaml, only for local development. They were moved to .env in the architecture review
 
 - Clarified (assignment 3): Only the assignment text applies. The grading criteria at the bottom of the assignment, the guide and the deadline are not taken into account
 - Decision (assignment 3): Two roles, Librarian and LibraryUser. The role is chosen at registration, and only one librarian can be created, because the system is a single library
@@ -186,7 +192,7 @@ Later questions:
 - Decision (assignment 3): A book stores the id of the user who loaned it (LoanedByUserId), and IsLoaned is computed from it. There is no separate loan type, because the flow only needs to know which user has each book
 - Decision (assignment 3): Another user's loan gives 403 Forbidden, because the book exists and the user can see it in the list
 - Decision (assignment 3): The token is created in AuthService (CreateToken), not in a separate JwtService. Login and the token it returns are one step, so they stay in one class. It uses the same Jwt settings as the token check in Program.cs
-- Decision (assignment 3): The JWT secret is in appsettings.json (the assignment asks for it)
+- Decision (assignment 3): The JWT secret was in appsettings.json (the assignment asked for it)
 - Decision (assignment 3): Scalar stays as the API reference, also for the token (already used in the project)
 - Decision (assignment 3): Docker stays as it is, and no CI (not part of this assignment)
 - Decision (frontend): Blazor Web App with Interactive Server, added after the API was complete. The server calls the API, so the API needs no CORS, and the frontend never touches the database
@@ -200,3 +206,4 @@ Later questions:
 - Limitation: An empty title or author is accepted
 - Limitation (assignment 3): Users registered before the AddUserRole migration have an empty role, and can't use the book endpoints. `docker compose down -v` starts with an empty database
 - Decision (architecture review): All diagrams are Mermaid in Documentation/diagrams/, so GitHub draws them and they change in the same commit as the code. The Excalidraw flow is redrawn as main-flow.md
+- Decision (architecture review): The JWT key and the database and pgAdmin passwords are read from environment variables: .env with Docker Compose, user-secrets with dotnet run. A new key replaces the one in the git history, and the API stops at startup without a valid key. See [the ADR](adr.md)
