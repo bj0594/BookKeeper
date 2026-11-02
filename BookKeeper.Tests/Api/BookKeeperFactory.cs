@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using BookKeeper.Core.Repository;
+using Microsoft.Extensions.Configuration;
 
 namespace BookKeeper.Tests.Api;
 
@@ -12,6 +13,9 @@ public class BookKeeperFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.ConfigureAppConfiguration((_, config) =>
+                config.AddInMemoryCollection(new Dictionary<string, string?> { ["Jwt:Key"] = "test-key-for-the-api-tests-only-0123456789" }));
+
         builder.ConfigureTestServices(services =>
         {
             services.AddSingleton<IBookRepository, FakeBookRepository>();
