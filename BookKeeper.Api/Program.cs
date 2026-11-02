@@ -7,6 +7,7 @@ using BookKeeper.Api.Auth;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,12 @@ builder.Services.AddAuthorization();
 // GET /health is Healthy only when the API can reach the database.
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<BookKeeperDbContext>();
+
+// Stops the API at startup when the setting is missing or invalid, instead of failing at the first request.
+builder.Services.AddOptions<JwtOptions>()
+    .Bind(builder.Configuration.GetSection("Jwt"))
+    .Validate(options => options.Key.Length >= 32, "Jwt:Key is missing or shorter than 32 characters")
+    .ValidateOnStart();
 
 var app = builder.Build();
 
