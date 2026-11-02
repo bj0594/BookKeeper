@@ -161,7 +161,7 @@ Open `BookKeeper.Api/BookKeeper.Api.http` in VS Code with the REST Client extens
 | `BookKeeper.Web` | Blazor frontend: the pages (`Components/Pages`), the API clients and `TokenStore` (`Api/`), the style (`wwwroot/app.css`) and the `Dockerfile` |
 | `BookKeeper.Web.Tests` | Frontend tests with bUnit, the fake clients and `StubHandler` (a fake API for `BooksClient`) |
 | `docker-compose.yaml` | The API, the frontend, PostgreSQL, pgAdmin and Traefik |
-| `Excalidraw` | Sketch of the MVP flow (`flow.excalidraw` and `flow.png`) |
+| `Documentation/diagrams` | The diagrams in Mermaid: architecture, login and token, main flow, data |
 | `Documentation` | Specification and API contract |
 
 `BookService` only depends on `IBookRepository`, and `AuthService` on `IUserRepository`. The API uses `EfBookRepository` and `EfUserRepository` (PostgreSQL), and the tests use `FakeBookRepository` and `FakeUserRepository` (memory). The controllers read the user id from the token and pass it to `BookService`, which passes it to the repository.
@@ -172,4 +172,7 @@ The frontend pages only know `IBooksClient` and `IAuthClient`. In the app they a
 
 - [Specification](Documentation/Specification.md): requirements, flow, interface, test list, decisions and limitations
 - [API contract](Documentation/api.md): endpoints, requests, responses and status codes
-- [MVP flow](Excalidraw/flow.png)
+- [Architecture](Documentation/diagrams/architecture.md): the containers, the clients, ports and dependencies
+- [Login and token](Documentation/diagrams/login-and-token.md): how a user is identified
+- [Main flow](Documentation/diagrams/main-flow.md): what a librarian and a library user can do
+- [Data](Documentation/diagrams/data.md): the tables in PostgreSQL

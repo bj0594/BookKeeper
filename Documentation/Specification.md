@@ -58,7 +58,7 @@ Ownership rules (assignment 3):
 - A user can't return another user's loan  ✔ ReturnBook_OtherUsersLoan_ThrowsUnauthorizedAccessException, PatchBooksReturn_LoanedByOtherUser_ReturnsForbidden
 
 ## 3 Flow
-![Flow](../Excalidraw/flow.png)
+[The main flow](diagrams/main-flow.md)
 
 A user registers with a role and logs in. A librarian sees all books and adds or deletes one. A library user sees the available books, loans one, sees their loans and returns it.
 
@@ -94,6 +94,7 @@ User: Id (Guid), Username (string, unique), PasswordHash (string), Role (Librari
 Dependencies:
 - BookService depends only on IBookRepository. EfBookRepository (BookKeeper.Infrastructure) stores the books in PostgreSQL and is used by the API. FakeBookRepository (BookKeeper.Core) keeps them in memory and is used by the tests.
 - AuthService depends only on IUserRepository. EfUserRepository stores the users in PostgreSQL and is used by the API. FakeUserRepository keeps them in memory and is used by the API tests.
+- The tables in PostgreSQL: [data diagram](diagrams/data.md). The whole system: [architecture diagram](diagrams/architecture.md).
 
 ## 5 Test list
 - [x] A new book can be added
@@ -189,3 +190,4 @@ Later questions:
 - Limitation: An unknown id gives 409 Conflict on loan, return and delete (no separate unknown id handling in the MVP, because the user picks a book from the list)
 - Limitation: An empty title or author is accepted
 - Limitation (assignment 3): Users registered before the AddUserRole migration have an empty role, and can't use the book endpoints. `docker compose down -v` starts with an empty database
+- Decision (architecture review): All diagrams are Mermaid in Documentation/diagrams/, so GitHub draws them and they change in the same commit as the code. The Excalidraw flow is redrawn as main-flow.md
