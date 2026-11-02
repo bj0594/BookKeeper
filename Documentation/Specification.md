@@ -150,9 +150,18 @@ Manual checks (frontend, in the browser with Docker Compose on http://localhost:
 - [x] Deleting a loaned book shows the API's error message
 - [x] Log out sends the user to the login page, and Books then asks for a login
 
+Architecture review (module 3):
+- [ ] The API refuses to start without a valid JWT key
+
+Manual checks (architecture review):
+- [ ] docker compose up stops with a message when .env is missing
+- [ ] A token signed with the old key gives 401
+- [ ] appsettings.json and docker-compose.yaml contain no secrets
+
 Later questions:
 - [x] Can a user loan several books?
 - [x] Can the library add multiple copies of the same book?
+
 
 ## 6 Questions, assumptions and decisions
 - Clarified: The repo will be used for the coming assignments
