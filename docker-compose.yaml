@@ -1,5 +1,5 @@
 # Starts the whole system: docker compose up --build -d
-# The secrets come from .env file, and is first copied from .env.example to .env
+# The secrets come from .env, which is copied from .env.example
 services:
   # PostgreSQL. The data is stored in the volume db_data, so it survives restarts and docker compose down.
   db:
